@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.security.dto;
+package com.odorok.OdorokApplication.security.domain;
 
 import lombok.Data;
 

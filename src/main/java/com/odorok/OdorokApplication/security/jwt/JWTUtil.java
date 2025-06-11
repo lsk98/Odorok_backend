@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.security.jwt;
 
-import com.odorok.OdorokApplication.security.dto.User;
+import com.odorok.OdorokApplication.security.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +13,10 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class JwtUtil {
+public class JWTUtil {
     private final SecretKey key;
 
-    public JwtUtil() {
+    public JWTUtil() {
         key = Jwts.SIG.HS256.key().build();
     }
 
@@ -27,7 +27,7 @@ public class JwtUtil {
 
     public String createAccessToken(User user) {
         return create("accessToken", accessExpMin,
-                Map.of( "email", user.getEmail(), "nickname", user.getNickname(), "name", user.getName()))
+                Map.of( "email", user.getEmail(), "nickname", user.getNickname(), "name", user.getName()));
     }
 
     public String createRefreshToken(User user) {

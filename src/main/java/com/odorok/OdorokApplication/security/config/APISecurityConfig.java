@@ -56,7 +56,6 @@ public class APISecurityConfig {
                 .addFilterBefore(exceptionFilter, JWTVerificationFilter.class);
         return http.build();
     }
-
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

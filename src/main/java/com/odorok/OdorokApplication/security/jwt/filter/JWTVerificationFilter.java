@@ -1,6 +1,7 @@
 package com.odorok.OdorokApplication.security.jwt.filter;
 
 import com.odorok.OdorokApplication.security.jwt.JWTUtil;
+import com.odorok.OdorokApplication.security.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,6 +9,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,6 +23,7 @@ import java.io.IOException;
 public class JWTVerificationFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -31,8 +36,13 @@ public class JWTVerificationFilter extends OncePerRequestFilter {
         }
 
         Claims claims = jwtUtil.getClaims(token);
-        // TODO: 실제 사용자 정보 조회
-        // TODO: Authentication 생성 및 SecurityContextHolder에 저장
+        // 실제 사용자 정보 조회
+        UserDetails details = userDetailsService.loadUserByUsername(claims.get("email").toString());
+
+        // Authentication 생성 및 SecurityContextHolder에 저장
+        var authentication = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         // 다음 filter 호출
         filterChain.doFilter(request, response);
     }

@@ -35,35 +35,4 @@ public class CustomOAuth2User implements OAuth2User {
     public User getUser() {
         return user;
     }
-
-//    public String getEmail() {
-//        Map<String, Object> account = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-//        return (String) account.get("email");
-//    }
-//
-//    public String getNickname() {
-//        Map<String, Object> properties = (Map<String, Object>) oAuth2User.getAttribute("properties");
-//        return (String) properties.get("nickname");
-//    }
-//
-//    public String getProfileImage() {
-//        Map<String, Object> properties = (Map<String, Object>) oAuth2User.getAttribute("properties");
-//        return (String) properties.get("profile_image");
-//    }
-//
-//    public String getName() {
-//        Map<String, Object> account = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-//        return (String) account.get("name");
-//    }
-//
-//    public String getGender() {
-//        Map<String, Object> account = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-//        return (String) account.get("gender");
-//    }
-//
-//    public String getBirthday() {
-//        Map<String, Object> account = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-//        return (String) account.get("birthday"); // MMDD 형식
-//    }
-
 }

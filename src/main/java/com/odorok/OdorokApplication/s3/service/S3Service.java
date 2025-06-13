@@ -1,7 +1,7 @@
-package com.odorok.OdorokApplication.service;
+package com.odorok.OdorokApplication.s3.service;
 
-import com.odorok.OdorokApplication.exception.FileUploadException;
-import com.odorok.OdorokApplication.util.S3Util;
+import com.odorok.OdorokApplication.s3.exception.FileUploadException;
+import com.odorok.OdorokApplication.s3.util.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

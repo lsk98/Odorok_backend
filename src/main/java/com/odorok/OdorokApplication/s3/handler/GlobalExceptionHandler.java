@@ -1,7 +1,7 @@
-package com.odorok.OdorokApplication.handler;
+package com.odorok.OdorokApplication.s3.handler;
 
-import com.odorok.OdorokApplication.exception.FileUploadException;
-import com.odorok.OdorokApplication.exception.UnauthorizedException;
+import com.odorok.OdorokApplication.s3.exception.FileUploadException;
+import com.odorok.OdorokApplication.s3.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

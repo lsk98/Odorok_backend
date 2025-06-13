@@ -1,6 +1,6 @@
-package com.odorok.OdorokApplication.validator;
+package com.odorok.OdorokApplication.s3.validator;
 
-import com.odorok.OdorokApplication.util.S3Util;
+import com.odorok.OdorokApplication.s3.util.S3Util;
 
 public class S3Validator {
     public static boolean isOwner(String url, String userId) {

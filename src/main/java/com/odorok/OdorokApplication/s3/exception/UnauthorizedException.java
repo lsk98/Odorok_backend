@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.exception;
+package com.odorok.OdorokApplication.s3.exception;
 
 public class UnauthorizedException extends RuntimeException{
     public UnauthorizedException(String message) {

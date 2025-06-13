@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.config;
+package com.odorok.OdorokApplication.s3.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

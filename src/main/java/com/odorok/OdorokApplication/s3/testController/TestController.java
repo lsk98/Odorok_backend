@@ -1,9 +1,9 @@
-package com.odorok.OdorokApplication.testController;
+package com.odorok.OdorokApplication.s3.testController;
 
-import com.odorok.OdorokApplication.exception.UnauthorizedException;
-import com.odorok.OdorokApplication.service.S3Service;
-import com.odorok.OdorokApplication.util.S3Util;
-import com.odorok.OdorokApplication.validator.S3Validator;
+import com.odorok.OdorokApplication.s3.exception.UnauthorizedException;
+import com.odorok.OdorokApplication.s3.util.S3Util;
+import com.odorok.OdorokApplication.s3.service.S3Service;
+import com.odorok.OdorokApplication.s3.validator.S3Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

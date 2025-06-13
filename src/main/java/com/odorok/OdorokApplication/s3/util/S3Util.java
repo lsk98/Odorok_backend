@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.util;
+package com.odorok.OdorokApplication.s3.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;

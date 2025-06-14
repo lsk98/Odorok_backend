@@ -66,6 +66,7 @@ public class JwtController {
         if (refreshToken == null || refreshToken.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Refresh token is required"));
         }
+
         Map<String, Object> claims = jwtUtil.getClaims(refreshToken);
         String email = (String) claims.get("email");
 

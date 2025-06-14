@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.commons.config;
+package com.odorok.OdorokApplication.commons.asynch.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

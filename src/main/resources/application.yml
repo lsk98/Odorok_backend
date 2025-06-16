@@ -49,3 +49,7 @@ jwt:
 logging:
   level:
     com.odorok: DEBUG  # 원하는 패키지 로깅 보기 편하게
+
+external:
+  keys :
+    durunubi : rQx+S5/Wi2FV6oAxJuQsxF7qhTlmydoiY4sDTcMNGV4e1+j957sPHX4FNbFn/5zaKk6+rFVgXQU4N3fVyMDBgA==

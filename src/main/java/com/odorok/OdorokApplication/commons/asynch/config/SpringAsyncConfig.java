@@ -13,10 +13,10 @@ public class SpringAsyncConfig {
     @Bean
     public Executor threadPoolTastExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(30);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("lwj-thread=>");
+        executor.setCorePoolSize(30);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(Integer.MAX_VALUE);
+        executor.setThreadNamePrefix("odorok-thread=>");
         return executor;
     }
 }

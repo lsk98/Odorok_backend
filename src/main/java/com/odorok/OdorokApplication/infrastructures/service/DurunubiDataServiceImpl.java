@@ -95,6 +95,7 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
             // 시군구, 시도 코드 설정해야함.
             courseRepository.save(course);
 
+            if(!item.has(GPXPATH_PROP_NAME)) continue;
             String gpxPath = item.get(GPXPATH_PROP_NAME).getAsString();
 
             loadGPX(gpxPath, course.getId());
@@ -108,7 +109,7 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
         SAXParser parser;
         try {
             parser = factory.newSAXParser();
-            DurunubiXmlHandler handler = DurunubiXmlHandler.getInstance();
+            DurunubiXmlHandler handler = new DurunubiXmlHandler();
             handler.init(crsId);
 
             parser.parse(gpxXml, handler);
@@ -140,23 +141,12 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
 
     @Data
     static class DurunubiXmlHandler extends DefaultHandler {
-        private static DurunubiXmlHandler instance;
-
         private final String TRACK_POINT_TAG_NAME = "trkpt";
         private final String LATITUDE_ATTR_NAME = "lat";
         private final String LONGITUDE_ATTR_NAME = "lon";
 
         private List<PathCoord> coords;
         private Long crsId;
-
-        private DurunubiXmlHandler() {}
-
-        public static DurunubiXmlHandler getInstance() {
-            if(instance == null) {
-                instance = new DurunubiXmlHandler();
-            }
-            return instance;
-        }
 
         public void init(long id) {
             coords = new ArrayList<>();

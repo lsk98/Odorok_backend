@@ -49,8 +49,9 @@ public class APISecurityConfig {
                 .authorizeHttpRequests(
                         auth -> auth
 //                                .requestMatchers(HttpMethod.GET, "/api/auth/**").permitAll() // 인증없이 사용할 경로 등록하기
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .anyRequest().authenticated()) // 그외 다른 요청은 인증 필요
+//                                .requestMatchers("/api/auth/**").permitAll()
+//                                .anyRequest().authenticated()) // 그외 다른 요청은 인증 필요
+                                .anyRequest().permitAll())
                 .addFilterBefore(jwtVerifyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(exceptionFilter, JWTVerificationFilter.class);

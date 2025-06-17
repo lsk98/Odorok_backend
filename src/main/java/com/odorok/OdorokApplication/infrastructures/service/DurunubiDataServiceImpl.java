@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -48,7 +50,7 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
     private final String CONTENTS_TAG_NAME = "item";
     private final String GPXPATH_PROP_NAME = "gpxpath";
 
-    public DurunubiDataServiceImpl(@Autowired @Qualifier("durudubiClient") WebClient client,
+    public DurunubiDataServiceImpl(@Autowired @Qualifier("durunubiClient") WebClient client,
                                    @Autowired CourseRepository courseRepository,
                                    @Autowired GilRepository gilRepository,
                                    @Autowired PathCoordRepository pathCoordRepository,
@@ -155,7 +157,7 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
 
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            if(qName.equalsIgnoreCase(TRACK_POINT_TAG_NAME)) {
+            if (qName.equalsIgnoreCase(TRACK_POINT_TAG_NAME)) {
                 PathCoord coord = new PathCoord();
                 coord.setLatitude(Double.parseDouble(attributes.getValue(LATITUDE_ATTR_NAME)));
                 coord.setLongitude(Double.parseDouble(attributes.getValue(LONGITUDE_ATTR_NAME)));
@@ -163,5 +165,10 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
                 coords.add(coord);
             }
         }
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void loadDataFromApiServerOnce() {
+        log.debug("here!!!!!!!!");
     }
 }

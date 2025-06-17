@@ -35,7 +35,6 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	runtimeOnly 'com.h2database:h2'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -45,6 +44,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	// https://mvnrepository.com/artifact/com.google.code.gson/gson
 	implementation("com.google.code.gson:gson:2.13.1")
+
+	// https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+	implementation("com.mysql:mysql-connector-j:9.3.0")
 }
 
 tasks.named('test') {

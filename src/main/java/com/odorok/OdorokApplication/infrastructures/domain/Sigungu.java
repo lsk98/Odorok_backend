@@ -4,24 +4,25 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity(name = "sigungus")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Sigungu {
     @Id
-    @Column(name = "id")
-    private Integer id;
+    private Integer no;
 
-    @Column(name = "code")
-    private Integer code;
-
-    @Column(name = "name")
+    @Column(name= "name")
     private String name;
 
-    @Column(name = "sido_code")
-    private Integer sidoCode;
+    @Column(name= "sido_code")
+    private String sidoCode;
+
+    @Column(name= "code")
+    private String code;
 }

@@ -1,22 +1,21 @@
 package com.odorok.OdorokApplication.infrastructures.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "sidos")
+@Entity(name = "diseases")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Sido {
+@Builder
+public class Disease {
     @Id
-    @Column(name = "code")
-    private Integer code;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name= "name")
+    @Column(name = "name")
     private String name;
 }

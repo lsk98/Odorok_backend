@@ -156,6 +156,7 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
 
     @Transactional
     @Override
+
     public void setRegionInfo(Long courseId, KakaoMapApiService.RegionInfo region) {
         Sido sido = regionService.findSidoByShortExp(region.getSido());
         Sigungu sigungu = regionService.findSigunguByShortExp(sido.getCode(), region.getSigungu());

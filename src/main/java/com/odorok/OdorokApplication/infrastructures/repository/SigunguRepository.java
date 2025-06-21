@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.infrastructures.repository;
 
-import com.odorok.OdorokApplication.infrastructures.domain.Sigungu;
+import com.odorok.OdorokApplication.draftDomain.Sigungu;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

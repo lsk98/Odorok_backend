@@ -1,7 +1,7 @@
 package com.odorok.OdorokApplication.infrastructures.service;
 
-import com.odorok.OdorokApplication.infrastructures.domain.Sido;
-import com.odorok.OdorokApplication.infrastructures.domain.Sigungu;
+import com.odorok.OdorokApplication.draftDomain.Sido;
+import com.odorok.OdorokApplication.draftDomain.Sigungu;
 
 public interface RegionServiceTemp {
     public Sido findSidoByShortExp(String sidoName);

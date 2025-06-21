@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.infrastructures.domain;
+package com.odorok.OdorokApplication.draftDomain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,19 +6,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "article_images")
+@Entity(name = "achievements")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ArticleImage {
+public class Achievement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "img_url")
-    private String imgUrl;
+    @Column (name = "goal")
+    private String goal;
 
-    @Column(name = "article_id")
-    private Long articleId;
+    @Column(name = "reward")
+    private Integer reward;
+
+    @Column(name="img_url")
+    private String imgUrl;
 }

@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.infrastructures.domain;
+package com.odorok.OdorokApplication.draftDomain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,15 +8,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "sidos")
+@Entity(name = "sigungus")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Sido {
+@Builder
+public class Sigungu {
     @Id
-    @Column(name = "code")
-    private Integer code;
+    private Integer no;
 
     @Column(name= "name")
     private String name;
+
+    @Column(name= "sido_code")
+    private String sidoCode;
+
+    @Column(name= "code")
+    private String code;
 }

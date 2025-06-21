@@ -1,27 +1,27 @@
-package com.odorok.OdorokApplication.infrastructures.domain;
-
+package com.odorok.OdorokApplication.draftDomain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "achievements")
+@Entity(name = "tiers")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Achievement {
+public class Tier {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column (name = "goal")
-    private String goal;
+    @Column(name = "title")
+    private String title;
 
-    @Column(name = "reward")
-    private Integer reward;
+    @Column(name = "level")
+    private Integer level;
 
-    @Column(name="img_url")
-    private String imgUrl;
+    @Column(name = "bound")
+    private Integer bound;
+
 }

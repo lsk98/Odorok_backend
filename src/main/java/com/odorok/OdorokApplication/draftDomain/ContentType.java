@@ -1,27 +1,21 @@
-package com.odorok.OdorokApplication.infrastructures.domain;
+package com.odorok.OdorokApplication.draftDomain;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "tiers")
+@Entity(name = "contenttypes")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Tier {
+public class ContentType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title")
-    private String title;
-
-    @Column(name = "level")
-    private Integer level;
-
-    @Column(name = "bound")
-    private Integer bound;
-
+    @Column(name = "name")
+    private String name;
 }

@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.infrastructures.domain;
+package com.odorok.OdorokApplication.draftDomain;
 
 
 import jakarta.persistence.*;

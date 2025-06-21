@@ -16,6 +16,6 @@ public class Sido {
     @Column(name = "code")
     private Integer code;
 
-    @Column(name= "name")
+    @Column(name = "name")
     private String name;
 }

@@ -5,8 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.odorok.OdorokApplication.commons.webflux.util.WebClientUtil;
-import com.odorok.OdorokApplication.infrastructures.domain.Sido;
-import com.odorok.OdorokApplication.infrastructures.domain.Sigungu;
 import com.odorok.OdorokApplication.infrastructures.domain.*;
 import com.odorok.OdorokApplication.infrastructures.repository.CourseRepository;
 import com.odorok.OdorokApplication.infrastructures.repository.PathCoordRepository;
@@ -17,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -156,7 +156,6 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
 
     @Transactional
     @Override
-
     public void setRegionInfo(Long courseId, KakaoMapApiService.RegionInfo region) {
         Sido sido = regionService.findSidoByShortExp(region.getSido());
         Sigungu sigungu = regionService.findSigunguByShortExp(sido.getCode(), region.getSigungu());

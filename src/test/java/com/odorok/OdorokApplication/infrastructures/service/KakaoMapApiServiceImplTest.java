@@ -1,7 +1,7 @@
 package com.odorok.OdorokApplication.infrastructures.service;
 
-import com.odorok.OdorokApplication.draftDomain.Sido;
-import com.odorok.OdorokApplication.draftDomain.Sigungu;
+import com.odorok.OdorokApplication.infrastructures.domain.Sido;
+import com.odorok.OdorokApplication.infrastructures.domain.Sigungu;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

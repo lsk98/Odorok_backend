@@ -5,9 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.odorok.OdorokApplication.commons.webflux.util.WebClientUtil;
-import com.odorok.OdorokApplication.infrastructures.domain.Course;
-import com.odorok.OdorokApplication.infrastructures.domain.PathCoord;
-import com.odorok.OdorokApplication.infrastructures.domain.Route;
+import com.odorok.OdorokApplication.infrastructures.domain.*;
 import com.odorok.OdorokApplication.infrastructures.repository.CourseRepository;
 import com.odorok.OdorokApplication.infrastructures.repository.PathCoordRepository;
 import com.odorok.OdorokApplication.infrastructures.repository.RouteRepository;
@@ -33,6 +31,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +39,9 @@ import java.util.Map;
 @Slf4j
 public class DurunubiDataServiceImpl implements DurunubiDataService{
     private final WebClient client;
+    private final KakaoMapApiService kakaoMapApiService;
+    private final RegionServiceTemp regionService;
+
     private final String DURUNUBI_URL_SCHEME = "https";
     private final String DURUNUBI_URL_HOST = "apis.data.go.kr";
     private final String DURUNUBI_URL_GIL_PATH = "/B551011/Durunubi/routeList";
@@ -59,7 +61,9 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
                                    @Autowired CourseRepository courseRepository,
                                    @Autowired RouteRepository gilRepository,
                                    @Autowired PathCoordRepository pathCoordRepository,
-                                   @Value("${external.keys.durunubi}") String secretKey) {
+                                   @Value("${external.keys.durunubi}") String secretKey,
+                                   @Autowired KakaoMapApiService kakaoMapApiService,
+                                   @Autowired RegionServiceTemp regionService) {
         this.client = client;
         this.courseRepository = courseRepository;
         this.gilRepository = gilRepository;
@@ -67,6 +71,8 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
         this.secretKey = secretKey;
         log.debug("DURUNUBI serviceKey : {}",secretKey);
         DURUNUBI_PARAM_MAP = Map.of("MobileOS", "ETC", "MobileApp", "Odorok", "numOfRows", "8000","pageNo", "1", "_type", "json", "serviceKey", secretKey);
+        this.kakaoMapApiService = kakaoMapApiService;
+        this.regionService = regionService;
     }
 
     @Transactional
@@ -75,7 +81,10 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
         String json = WebClientUtil.doGetBlock(client, DURUNUBI_URL_GIL_PATH, DURUNUBI_PARAM_MAP);
         log.debug("gil data json : {}", json);
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray items = root.getAsJsonObject("response").getAsJsonObject("body").getAsJsonObject("items").getAsJsonArray("item");
+        JsonArray items = root.getAsJsonObject("response")
+                .getAsJsonObject("body")
+                .getAsJsonObject("items")
+                .getAsJsonArray("item");
 
         List<Route> totRoutes = new ArrayList<>(INITIAL_LIST_SIZE);
         for(JsonElement ele : items) {
@@ -91,8 +100,9 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
 
     @Transactional
     @Override
-    public void loadCourseDatas() {
+    public Map<Long, String> loadCourseDatas() {
         String json = WebClientUtil.doGetBlock(client, DURUNUBI_URL_COURSE_PATH, DURUNUBI_PARAM_MAP);
+        Map<Long, String> gpxPathMap = new HashMap<>();
 
         log.debug("course data json : {}", json.substring(0, 1000));
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
@@ -104,19 +114,19 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
             Course course = new Course();
             course.setWithJson(item);
 
-            // 시군구, 시도 코드 설정해야함.
             courseRepository.save(course);
-
             if(!item.has(GPXPATH_PROP_NAME)) continue;
             String gpxPath = item.get(GPXPATH_PROP_NAME).getAsString();
 
-            loadGPX(gpxPath, course.getId());
+            gpxPathMap.put(course.getId(), gpxPath);
+            log.debug("setting course record => {}", course);
         }
+        return gpxPathMap;
     }
 
     @Transactional
     @Override
-    public void loadGPX(String url, Long crsId) {
+    public KakaoMapApiService.RegionInfo loadGPX(String url, Long crsId) {
         String gpxXml = client.get().uri(url).accept(MediaType.APPLICATION_XML).retrieve().bodyToMono(String.class).block();
         log.debug("path data xml : {}", gpxXml.substring(0, 1000));
         SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -130,6 +140,8 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
 
             List<PathCoord> track = handler.getCoords();
             pathCoordRepository.saveAll(track);
+
+            return kakaoMapApiService.convertCoord2Region(track.get(0).getLatitude(), track.get(0).getLongitude());
         } catch (ParserConfigurationException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -142,16 +154,14 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
         }
     }
 
+    @Transactional
     @Override
-    public void loadToLocalDB() {
-        loadGilDatas();
-        loadCourseDatas();
-        log.debug("로컬 DB로 업데이트 완료!");
-    }
-
-    @Override
-    public void updateLocalDB() {
-        throw new RuntimeException("아직 개발되지 않은 기능");
+    public void setRegionInfo(Long courseId, KakaoMapApiService.RegionInfo region) {
+        Sido sido = regionService.findSidoByShortExp(region.getSido());
+        Sigungu sigungu = regionService.findSigunguByShortExp(sido.getCode(), region.getSigungu());
+        Course course = courseRepository.findById(courseId).get();
+        course.setSidoCode(sido.getCode());
+        course.setSigunguCode(sigungu.getCode());
     }
 
     @Data
@@ -181,11 +191,5 @@ public class DurunubiDataServiceImpl implements DurunubiDataService{
                 coords.add(coord);
             }
         }
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void loadDataFromApiServerOnce() {
-        log.debug("attempt to load datas from durunubi api -------------");
-        loadToLocalDB();
     }
 }

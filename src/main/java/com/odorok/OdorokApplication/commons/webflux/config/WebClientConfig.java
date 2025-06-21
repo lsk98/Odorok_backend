@@ -16,9 +16,17 @@ public class WebClientConfig {
     }
 
     @Bean("durunubiClient")
-    public WebClient dataClient(WebClient.Builder builder) {
+    public WebClient durunubiClient(WebClient.Builder builder) {
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://apis.data.go.kr");
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY); // 또는 VALUES_ONLY
         return builder.uriBuilderFactory(factory).codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)).build();
     }
+
+    @Bean("kakaoClient")
+    public WebClient kakaoClient(WebClient.Builder builder) {
+        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://dapi.kakao.com");
+        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY); // 또는 VALUES_ONLY
+        return builder.uriBuilderFactory(factory).codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)).build();
+    }
+
 }

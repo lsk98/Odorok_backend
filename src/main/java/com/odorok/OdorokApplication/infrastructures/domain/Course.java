@@ -71,8 +71,6 @@ public class Course implements JsonSettable {
     @Column(name = "reward")
     private Integer reward;
 
-
-
     @Override
     public void setWithJson(JsonObject object) {
         this.idx = object.get(PN_CRS_IDX).getAsString();

@@ -15,5 +15,4 @@ public class OdorokApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OdorokApplication.class, args);
 	}
-
 }

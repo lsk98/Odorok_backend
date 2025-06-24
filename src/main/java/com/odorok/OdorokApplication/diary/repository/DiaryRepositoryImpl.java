@@ -1,6 +1,6 @@
-package com.odorok.OdorokApplication.Diary.repository;
+package com.odorok.OdorokApplication.diary.repository;
 
-import com.odorok.OdorokApplication.Diary.dto.DiaryDetail;
+import com.odorok.OdorokApplication.diary.dto.DiaryDetail;
 import com.odorok.OdorokApplication.domain.QDiary;
 import com.odorok.OdorokApplication.domain.QDiaryImage;
 import com.odorok.OdorokApplication.domain.QVisitedCourse;

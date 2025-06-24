@@ -1,6 +1,6 @@
-package com.odorok.OdorokApplication.Diary.service;
+package com.odorok.OdorokApplication.diary.service;
 
-import com.odorok.OdorokApplication.Diary.dto.DiaryDetail;
+import com.odorok.OdorokApplication.diary.dto.DiaryDetail;
 
 public interface DiaryService {
 //    public List<DiarySummary> findAllDiaryByMember(long userId);

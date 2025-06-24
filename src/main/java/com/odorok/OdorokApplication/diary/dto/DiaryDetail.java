@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.Diary.dto;
+package com.odorok.OdorokApplication.diary.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

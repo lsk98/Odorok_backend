@@ -1,7 +1,7 @@
-package com.odorok.OdorokApplication.Diary.service;
+package com.odorok.OdorokApplication.diary.service;
 
-import com.odorok.OdorokApplication.Diary.dto.DiaryDetail;
-import com.odorok.OdorokApplication.Diary.repository.DiaryRepository;
+import com.odorok.OdorokApplication.diary.dto.DiaryDetail;
+import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

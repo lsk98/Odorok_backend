@@ -10,7 +10,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ArticleImageServiceImpl implements ArticleImageService{
-    private final ArticleImageService articleImageService;
     private final S3Service s3Service;
 
     @Override

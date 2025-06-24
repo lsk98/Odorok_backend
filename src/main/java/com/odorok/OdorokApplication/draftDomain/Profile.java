@@ -35,13 +35,13 @@ public class Profile {
     private Long userId;
 
     @Column(name = "achievement1")
-    private Long achievement1;
+    private Integer achievement1;
 
     @Column(name = "achievement2")
-    private Long achievement2;
+    private Integer achievement2;
 
     @Column(name = "achievement3")
-    private Long achievement3;
+    private Integer achievement3;
 
     @Column(name = "tier_id")
     private Long tierId;

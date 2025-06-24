@@ -1,8 +1,9 @@
 package com.odorok.OdorokApplication.s3.testController;
 
+import com.odorok.OdorokApplication.s3.dto.S3UploadResult;
 import com.odorok.OdorokApplication.s3.exception.UnauthorizedException;
 import com.odorok.OdorokApplication.s3.util.S3Util;
-import com.odorok.OdorokApplication.s3.service.S3Service;
+import com.odorok.OdorokApplication.s3.service.S3ServiceImpl;
 import com.odorok.OdorokApplication.s3.validator.S3Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +14,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @RequestMapping("/api/images")
 public class TestController {
-    private final S3Service s3Service;
+    private final S3ServiceImpl s3Service;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadImage(@RequestParam String domain,
+    public ResponseEntity<S3UploadResult> uploadImage(@RequestParam String domain,
                                               @RequestParam String userId,
                                               @RequestParam MultipartFile file){
-        String url = s3Service.upload(domain,userId,file);
+        S3UploadResult url = s3Service.upload(domain,userId,file);
         return ResponseEntity.ok(url);
     }
 

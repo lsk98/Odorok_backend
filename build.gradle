@@ -6,6 +6,8 @@ plugins {
 
 group = 'com.odorok'
 version = '0.0.1-SNAPSHOT'
+def querydslVersion = "5.0.0"
+def generated = file("build/generated/querydsl")
 
 java {
 	toolchain {
@@ -24,6 +26,17 @@ repositories {
 }
 
 dependencies {
+	//querydsl 의존성
+	implementation "com.querydsl:querydsl-core:5.0.0"
+	implementation "com.querydsl:querydsl-collections"
+	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api:3.1.0"
+	testImplementation ('org.springframework.boot:spring-boot-starter-test')
+	testImplementation 'jakarta.persistence:jakarta.persistence-api'
+	testImplementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+
 	implementation platform('software.amazon.awssdk:bom:2.25.15')
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -47,6 +60,23 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
 	implementation("com.mysql:mysql-connector-j:9.3.0")
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.annotationProcessorGeneratedSourcesDirectory = generated
+}
+
+//java source set 에 Querydsl Q Class 위치 추가
+sourceSets {
+	main {
+		java {
+			srcDirs += generated
+		}
+	}
+}
+
+clean {
+	delete generated
 }
 
 tasks.named('test') {

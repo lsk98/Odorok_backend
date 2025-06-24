@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Achievement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column (name = "goal")
     private String goal;

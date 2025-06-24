@@ -20,8 +20,8 @@ public class Attraction {
 
     private String title;
 
-    @Column(name = "first_image")
-    private String firstImage;
+    @Column(name = "first_image1")
+    private String firstImage1;
 
     @Column(name = "first_image2")
     private String firstImage2;

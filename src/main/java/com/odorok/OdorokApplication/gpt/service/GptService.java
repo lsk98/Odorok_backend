@@ -1,16 +1,12 @@
-package com.odorok.OdorokApplication.gpt;
+package com.odorok.OdorokApplication.gpt.service;
 
-import com.nimbusds.openid.connect.sdk.Prompt;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import java.util.List;
 
 public interface GptService {
-    String sendPrompt(String context, Prompt prompt);
-
+    List<Prompt> sendPrompt(List<Prompt> context, Prompt prompt);
     // content : 지금까지 이루어진 대화내역.
     // prompt : 새로 전달할 대화 내용.
-
     @Getter
     @Setter
     @AllArgsConstructor

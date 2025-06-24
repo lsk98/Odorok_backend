@@ -34,4 +34,13 @@ public class VisitedCourse {
 
     @Column(name = "img_url", length = 500)
     private String imgUrl;
+
+    @Column(name = "stars")
+    private Integer stars;
+
+    @Column(name = "review")
+    private String review;
+
+    @Column(name = "is_finished")
+    private Boolean isFinished;
 }

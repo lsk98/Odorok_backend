@@ -50,9 +50,6 @@ public class Article {
     @Column(name = "notice")
     private Boolean notice;
 
-    @Column(name = "stars")
-    private Integer stars;
-
     @Column(name = "user_id")
     private Long userId;
 

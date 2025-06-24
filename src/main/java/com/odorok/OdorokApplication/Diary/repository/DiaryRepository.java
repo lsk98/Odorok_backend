@@ -1,4 +1,7 @@
 package com.odorok.OdorokApplication.Diary.repository;
 
-public class DiaryRepository {
+import com.odorok.OdorokApplication.Diary.dto.DiaryDetail;
+
+public interface DiaryRepository {
+    public DiaryDetail findDiaryById(long userId, long diaryId);
 }

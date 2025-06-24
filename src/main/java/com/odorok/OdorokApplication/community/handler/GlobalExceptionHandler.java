@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.s3.handler;
+package com.odorok.OdorokApplication.community.handler;
 
 import com.odorok.OdorokApplication.s3.exception.FileUploadException;
 import com.odorok.OdorokApplication.s3.exception.UnauthorizedException;

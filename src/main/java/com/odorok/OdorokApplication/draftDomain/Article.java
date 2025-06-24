@@ -50,8 +50,8 @@ public class Article {
     @Column(name = "notice")
     private Boolean notice;
 
-    @Column(name = "start")
-    private Integer start;
+    @Column(name = "stars")
+    private Integer stars;
 
     @Column(name = "user_id")
     private Long userId;
@@ -61,4 +61,16 @@ public class Article {
 
     @Column(name = "disease_id")
     private Integer diseaseId;
+
+    //임시 생성자 테스트 끝나면 삭제해야함
+    public Article(String title, int likeCount, int viewCount, int commentCount,
+                   int boardType, boolean notice, Long userId) {
+        this.title = title;
+        this.likeCount = likeCount;
+        this.viewCount = viewCount;
+        this.commentCount = commentCount;
+        this.boardType = boardType;
+        this.notice = notice;
+        this.userId = userId;
+    }
 }

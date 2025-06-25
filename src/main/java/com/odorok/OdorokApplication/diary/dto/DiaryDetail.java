@@ -19,4 +19,14 @@ public class DiaryDetail {
     private String courseName;
     private LocalDateTime visitedAt;
     private LocalDateTime createdAt;
+
+    public DiaryDetail(Long id, String title, String content, Long userId, String courseName, LocalDateTime visitedAt, LocalDateTime createdAt) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.userId = userId;
+        this.courseName = courseName;
+        this.visitedAt = visitedAt;
+        this.createdAt = createdAt;
+    }
 }

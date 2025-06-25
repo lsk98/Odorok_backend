@@ -33,7 +33,6 @@ public class DiaryRepositoryImpl implements DiaryRepositoryCustom{
                         diary.id,
                         diary.title,
                         diary.content,
-                        Expressions.nullExpression(), // imgs는 따로 조회
                         diary.userId,
                         course.name,
                         visitedCourse.visitedAt,

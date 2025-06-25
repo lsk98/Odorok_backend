@@ -15,9 +15,10 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class DiaryRepositoryImpl implements DiaryRepository{
+public class DiaryRepositoryImpl implements DiaryRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
+
     QDiary diary = QDiary.diary;
     QDiaryImage diaryImage = QDiaryImage.diaryImage;
     QVisitedCourse visitedCourse = QVisitedCourse.visitedCourse;

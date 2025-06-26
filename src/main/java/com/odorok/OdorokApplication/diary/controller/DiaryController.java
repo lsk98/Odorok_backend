@@ -1,6 +1,7 @@
 package com.odorok.OdorokApplication.diary.controller;
 
-import com.odorok.OdorokApplication.diary.dto.DiaryDetail;
+import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
+import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
 import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,13 @@ public class DiaryController {
             return handleFail(new RuntimeException("해당 일지를 찾을 수 없습니다."), HttpStatus.NOT_FOUND);
         }
         return handleSuccess(Map.of("diary", diary), HttpStatus.OK);
+    }
+
+    @GetMapping("/permission")
+    public ResponseEntity<?> searchDiaryGeneratePermission(@AuthenticationPrincipal CustomUserDetails user) {
+        long userId = user.getUser().getId();
+        DiaryPermissionCheckResponse response = diaryService.findDiaryPermission(userId);
+        return handleSuccess(Map.of("permission", response), HttpStatus.OK);
     }
 
     ResponseEntity<?> handleSuccess(Object data, HttpStatus status) {

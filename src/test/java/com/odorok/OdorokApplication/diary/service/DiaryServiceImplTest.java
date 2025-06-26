@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.diary.service;
 
-import com.odorok.OdorokApplication.diary.dto.DiaryDetail;
+import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

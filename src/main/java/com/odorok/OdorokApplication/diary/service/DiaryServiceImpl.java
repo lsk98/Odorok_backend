@@ -25,7 +25,7 @@ public class DiaryServiceImpl implements DiaryService{
     // 일지 생성권 itemId 캐싱.
     @PostConstruct
     public void initDiaryItemId() {
-        this.diaryPermissionItemId = itemRepository.findByName("일지 생성권")
+        this.diaryPermissionItemId = itemRepository.findByTitle("일지 생성권")
                 .map(Item::getId)
                 .orElseThrow(() ->
                         new IllegalStateException("'일지 생성권' 아이템이 DB에 없습니다. 서버 실행 중단. 데이터 삽입을 확인하세요.")
@@ -39,6 +39,7 @@ public class DiaryServiceImpl implements DiaryService{
 
     @Override
     public DiaryPermissionCheckResponse findDiaryPermission(long userId) {
+        diaryPermissionItemId = 3L;
         Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, diaryPermissionItemId)
                 .orElseGet(() -> Inventory.builder().userId(userId).itemId(diaryPermissionItemId).count(0).build());
         return new DiaryPermissionCheckResponse(inventory.getUserId(), inventory.getItemId(), inventory.getCount());

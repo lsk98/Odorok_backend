@@ -27,12 +27,12 @@ public class JWTUtil {
 
     public String createAccessToken(User user) {
         return create("accessToken", accessExpMin,
-                Map.of( "email", user.getEmail(), "nickname", user.getNickname(), "name", user.getName()));
+                Map.of( "id", user.getId(), "email", user.getEmail(), "nickname", user.getNickname(), "name", user.getName()));
     }
 
     public String createRefreshToken(User user) {
         return create("refreshToken", refreshExpMin,
-                Map.of("email", user.getEmail()));
+                Map.of("id", user.getId(), "email", user.getEmail()));
     }
 
     public String create(String subject, long expireMin, Map<String, Object> claims) {

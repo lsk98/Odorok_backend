@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class CommunityExceptionHandler {
 
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<String> handleUpload(FileUploadException e) {

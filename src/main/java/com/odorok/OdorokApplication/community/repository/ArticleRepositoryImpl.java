@@ -49,7 +49,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
                                 article.commentCount,
                                 article.boardType,
                                 article.notice,
-                                article.vcourseId,
+                                article.courseId,
                                 article.diseaseId,
                                 user.nickname
 

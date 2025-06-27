@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface VisitedCourseRepositoryCustom {
     List<VisitedAttraction> findVisitedAttractionByVisitedCourseId(Long userId, Long visitedCourseId);
-    VisitedCourseAndAttraction findCourseByVisitedCourseById(Long userId, Long visitedCourseId);
+    VisitedCourseAndAttraction findCourseAndAttractionsByVisitedCourseId(Long userId, Long visitedCourseId);
 }

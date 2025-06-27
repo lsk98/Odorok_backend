@@ -15,10 +15,13 @@ public class VisitedCourseAndAttraction {
     @Setter
     private List<VisitedAttraction> visitedAttractions;
 
-    String attractionsToString() {
-        return visitedAttractions.stream()
+    public String attractionsToString() {
+        if(visitedAttractions.size() == 0) return "";
+        String attractions = visitedAttractions.stream()
                 .map(VisitedAttraction::getTitle) // 명소 이름만 추출
                 .distinct()
                 .collect(Collectors.joining(", "));
+
+        return String.format("코스 외에도 사용자는 %s에 다녀왔습니다.", attractions);
     }
 }

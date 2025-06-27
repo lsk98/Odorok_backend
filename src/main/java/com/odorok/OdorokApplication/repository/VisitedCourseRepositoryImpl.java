@@ -44,7 +44,7 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
     }
 
     @Override
-    public VisitedCourseAndAttraction findCourseByVisitedCourseById(Long userId, Long visitedCourseId) {
+    public VisitedCourseAndAttraction findCourseAndAttractionsByVisitedCourseId(Long userId, Long visitedCourseId) {
         List<VisitedAttraction> visitedAttractionList = findVisitedAttractionByVisitedCourseId(userId, visitedCourseId);
         Tuple tuple = jpaQueryFactory
                 .select(courses.name, courses.summary)

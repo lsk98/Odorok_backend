@@ -53,8 +53,8 @@ public class Article {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "vcourse_id")
-    private Long vcourseId;
+    @Column(name = "course_id")
+    private Long courseId;
 
     @Column(name = "disease_id")
     private Integer diseaseId;

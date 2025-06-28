@@ -10,5 +10,6 @@ public interface S3Service {
 
     List<String> uploadMany(String domain, String userId, List<MultipartFile> fileList);
 
-    public void delete(String key);
+    public void delete(String url);
+    public void deleteMany(List<String> urls);
 }

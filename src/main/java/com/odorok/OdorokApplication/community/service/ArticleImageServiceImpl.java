@@ -1,10 +1,13 @@
 package com.odorok.OdorokApplication.community.service;
 
+import com.odorok.OdorokApplication.community.repository.ArticleImageRepository;
+import com.odorok.OdorokApplication.draftDomain.ArticleImage;
 import com.odorok.OdorokApplication.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -12,24 +15,30 @@ import java.util.List;
 public class ArticleImageServiceImpl implements ArticleImageService{
     private final S3Service s3Service;
 
+    private final ArticleImageRepository articleImageRepository;
+
     @Override
-    public void insertArticleImages(Long ArticleId, List<MultipartFile> images) {
+    public List<String> insertArticleImages(Long userId, List<MultipartFile> images) {
+        return s3Service.uploadMany("community", String.valueOf(userId),images);
+    }
+
+    @Override
+    public void deleteArticleImages(Long articleId) {
 
     }
 
     @Override
-    public void deleteArticleImages(Long id) {
+    public void deleteArticleImageUrl(Long articleId) {
 
     }
 
     @Override
-    public void deleteArticleImageUrl(Long id) {
-
-    }
-
-    @Override
-    public void insertArticleImageUrl(Long id, List<String> urls) {
-
+    public void insertArticleImageUrl(Long userId, List<String> urls) {
+        List<ArticleImage> images = new ArrayList();
+        for(String url : urls){
+            images.add(new ArticleImage(userId,url));
+        }
+        articleImageRepository.saveAll(images);
     }
 
     @Override
@@ -40,5 +49,10 @@ public class ArticleImageServiceImpl implements ArticleImageService{
     @Override
     public List<String> updateArticleImageUrl(Long id, List<String> afterUrl) {
         return null;
+    }
+
+    @Override
+    public void deleteImages(List<String> urls) {
+        s3Service.deleteMany(urls);
     }
 }

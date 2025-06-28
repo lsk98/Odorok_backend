@@ -1,14 +1,12 @@
 package com.odorok.OdorokApplication.community.dto.response;
 
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
+@EqualsAndHashCode
 public class ArticleSummary {
     private Long id;
     private String title;
@@ -20,14 +18,14 @@ public class ArticleSummary {
     private Integer boardType;
     private Boolean notice;
     private Long vcourseId;
-    private Integer diseaseId;
+    private Long diseaseId;
     private String nickname;
 
     @QueryProjection
     public ArticleSummary(Long id, String title, String content, LocalDateTime createdAt,
                           Integer likeCount, Integer viewCount, Integer commentCount,
                           Integer boardType, Boolean notice,
-                          Long vcourseId, Integer diseaseId, String nickname) {
+                          Long vcourseId, Long diseaseId, String nickname) {
         this.id = id;
         this.title = title;
         this.content = content;

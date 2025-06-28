@@ -21,4 +21,9 @@ public class ArticleImage {
 
     @Column(name = "article_id")
     private Long articleId;
+
+    public ArticleImage(Long articleId, String imgUrl) {
+        this.articleId = articleId;
+        this.imgUrl = imgUrl;
+    }
 }

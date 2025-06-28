@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.config;
+package com.odorok.OdorokApplication.commons.querydsl.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

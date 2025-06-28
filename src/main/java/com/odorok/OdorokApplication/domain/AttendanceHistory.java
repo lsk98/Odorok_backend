@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttendanceHistory {
+public class  AttendanceHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.diary.repository;
 
-import com.odorok.OdorokApplication.config.QueryDslConfig;
+import com.odorok.OdorokApplication.commons.querydsl.config.QueryDslConfig;
 import com.odorok.OdorokApplication.diary.dto.DiaryDetail;
 import com.odorok.OdorokApplication.domain.Diary;
 import com.odorok.OdorokApplication.domain.DiaryImage;

@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.infrastructures.repository;
+package com.odorok.OdorokApplication.course.repository;
 
 import com.odorok.OdorokApplication.infrastructures.domain.Sigungu;
 import org.springframework.data.jpa.repository.JpaRepository;

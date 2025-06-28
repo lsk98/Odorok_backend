@@ -2,7 +2,7 @@ package com.odorok.OdorokApplication.community.repository;
 
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
-import com.odorok.OdorokApplication.config.QueryDslConfig;
+import com.odorok.OdorokApplication.commons.querydsl.config.QueryDslConfig;
 import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.draftDomain.Article;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;

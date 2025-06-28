@@ -33,9 +33,9 @@ public class S3ServiceImpl implements S3Service{
 
     @Override
     public S3UploadResult upload(String domain, String userId, MultipartFile file) {
+        String fileName = UUID.randomUUID() +"_"+ file.getOriginalFilename();
+        String key = S3Util.generateKey(domain, userId, fileName);
         try {
-            String fileName = UUID.randomUUID() +"_"+ file.getOriginalFilename();
-            String key = S3Util.generateKey(domain, userId, fileName);
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
@@ -46,6 +46,7 @@ public class S3ServiceImpl implements S3Service{
             );
             return new S3UploadResult(key,S3Util.generateUrl(bucket,region,key));
         } catch (IOException e) {
+            log.warn("s3 파일 삽입 실패 - key: {}, message: {}", key, e.getMessage(), e);
             throw new FileUploadException("파일 업로드 실패", e);
         }
     }
@@ -55,36 +56,36 @@ public class S3ServiceImpl implements S3Service{
             return Collections.emptyList();
         }
         List<String> urlList = new ArrayList<>();
-        List<String> keyList = new ArrayList<>();
         try{
             for(MultipartFile file : fileList){
                 S3UploadResult result = upload(domain,userId,file);
                 urlList.add(result.getUrl());
-                keyList.add(result.getKey());
             }
             return urlList;
-        }catch (FileUploadException e) {
-            keyList.forEach(this::delete);
+        }catch (Exception e) {
+            deleteMany(urlList);
             throw e;
-        } catch (S3Exception e) {
-            keyList.forEach(this::delete);
-            throw new FileUploadException("S3 업로드 실패", e);
-        } catch (Exception e) {
-            keyList.forEach(this::delete);
-            throw new FileUploadException("예상치 못한 예외 발생", e);
         }
     }
     @Override
-    public void delete(String key) {
+    public void delete(String url) {
+        String key = S3Util.extractKeyFromUrl(url);
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(bucket)
                     .key(key)
                     .build());
-        } catch (S3Exception e) {
-            log.warn("S3 파일 삭제 실패 - key: {}, message: {}", key, e.getMessage(), e);
-        } catch (Exception e) {
+        }catch (Exception e) {
             log.warn("예상치 못한 삭제 예외 - key: {}, message: {}", key, e.getMessage(), e);
+            throw e;
         }
     }
+
+    @Override
+    public void deleteMany(List<String> urls) {
+        for(String url : urls){
+            delete(url);
+        }
+    }
+
 }

@@ -25,9 +25,11 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final StringPath content = createString("content");
 
+    public final NumberPath<Long> courseId = createNumber("courseId", Long.class);
+
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
-    public final NumberPath<Integer> diseaseId = createNumber("diseaseId", Integer.class);
+    public final NumberPath<Long> diseaseId = createNumber("diseaseId", Long.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -40,8 +42,6 @@ public class QArticle extends EntityPathBase<Article> {
     public final StringPath title = createString("title");
 
     public final NumberPath<Long> userId = createNumber("userId", Long.class);
-
-    public final NumberPath<Long> vcourseId = createNumber("vcourseId", Long.class);
 
     public final NumberPath<Integer> viewCount = createNumber("viewCount", Integer.class);
 

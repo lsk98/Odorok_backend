@@ -57,7 +57,7 @@ public class Article {
     private Long courseId;
 
     @Column(name = "disease_id")
-    private Integer diseaseId;
+    private Long diseaseId;
 
     //임시 생성자 테스트 끝나면 삭제해야함
     public Article(String title, int likeCount, int viewCount, int commentCount,

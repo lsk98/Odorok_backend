@@ -1,8 +1,6 @@
 package com.odorok.OdorokApplication.commons.response;
 
-import lombok.*;
-
-public final class CommonResponseFactory {
+public final class CommonResponseBuilder {
     //성공 응답
     public static <T> ResponseRoot<T> success(String message, T data) {
         return ResponseRoot.<T>builder().status("success").message(message).data(data).build();
@@ -18,5 +16,5 @@ public final class CommonResponseFactory {
         return ResponseRoot.<T>builder().status("fail").message(message).build();
     }
 
-    private CommonResponseFactory() {}
+    private CommonResponseBuilder() {}
 }

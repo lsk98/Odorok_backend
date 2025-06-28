@@ -36,6 +36,7 @@ dependencies {
 	testImplementation ('org.springframework.boot:spring-boot-starter-test')
 	testImplementation 'jakarta.persistence:jakarta.persistence-api'
 	testImplementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	testImplementation 'org.springframework.security:spring-security-test'
 
 	implementation platform('software.amazon.awssdk:bom:2.25.15')
 	implementation 'software.amazon.awssdk:s3'

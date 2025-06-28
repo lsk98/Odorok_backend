@@ -15,12 +15,12 @@ public class VisitedCourseAndAttraction {
     private String courseName;
     private String courseSummary;
     @Setter
-    private List<VisitedAttraction> visitedAttractions;
+    private List<VisitedAdditionalAttraction> visitedAttractions;
 
     public String attractionsToString() {
         if(visitedAttractions.size() == 0) return "";
         String attractions = visitedAttractions.stream()
-                .map(VisitedAttraction::getTitle) // 명소 이름만 추출
+                .map(VisitedAdditionalAttraction::getTitle) // 명소 이름만 추출
                 .distinct()
                 .collect(Collectors.joining(", "));
 

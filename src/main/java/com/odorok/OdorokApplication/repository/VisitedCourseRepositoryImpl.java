@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.repository;
 
-import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAttraction;
+import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.domain.QVisitedAttraction;
 import com.odorok.OdorokApplication.domain.QVisitedCourse;
@@ -27,10 +27,10 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
     QAttraction attractions = QAttraction.attraction;
 
     @Override
-    public List<VisitedAttraction> findVisitedAttractionByVisitedCourseId(Long userId, Long visitedCourseId) {
+    public List<VisitedAdditionalAttraction> findVisitedAttractionByVisitedCourseId(Long userId, Long visitedCourseId) {
         return jpaQueryFactory
                 .select(Projections.constructor(
-                        VisitedAttraction.class,
+                        VisitedAdditionalAttraction.class,
                         attractions.title,
                         attractions.addr1,
                         attractions.overview
@@ -45,7 +45,7 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
 
     @Override
     public VisitedCourseAndAttraction findCourseAndAttractionsByVisitedCourseId(Long userId, Long visitedCourseId) {
-        List<VisitedAttraction> visitedAttractionList = findVisitedAttractionByVisitedCourseId(userId, visitedCourseId);
+        List<VisitedAdditionalAttraction> visitedAttractionList = findVisitedAttractionByVisitedCourseId(userId, visitedCourseId);
         Tuple tuple = jpaQueryFactory
                 .select(courses.name, courses.summary)
                 .from(visitedCourses)

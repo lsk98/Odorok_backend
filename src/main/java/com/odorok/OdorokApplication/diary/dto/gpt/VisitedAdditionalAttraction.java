@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class VisitedAttraction {
+public class VisitedAdditionalAttraction {
     private String title;
     private String address;
     private String overview;

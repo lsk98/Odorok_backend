@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.diary.service;
 
-import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAttraction;
+import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
@@ -9,14 +9,12 @@ import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.gpt.service.GptService;
 import com.odorok.OdorokApplication.repository.InventoryRepository;
-import com.odorok.OdorokApplication.repository.ItemRepository;
 import com.odorok.OdorokApplication.repository.VisitedCourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.junit.jupiter.api.Nested;
@@ -149,8 +147,8 @@ public class DiaryServiceImplTest {
             ReflectionTestUtils.setField(diaryService, "rawSystemPrompt",rawPromptTemplate);
 
             // 프롬프트 생성을 위한 mock 방문지 정보 설정
-            VisitedAttraction a1 = new VisitedAttraction("해운대", "부산 해운대구", "명소1");
-            VisitedAttraction a2 = new VisitedAttraction("광안리", "부산 수영구", "명소2");
+            VisitedAdditionalAttraction a1 = new VisitedAdditionalAttraction("해운대", "부산 해운대구", "명소1");
+            VisitedAdditionalAttraction a2 = new VisitedAdditionalAttraction("광안리", "부산 수영구", "명소2");
 
             VisitedCourseAndAttraction course = VisitedCourseAndAttraction.builder()
                     .courseName("남파랑길 1코스")

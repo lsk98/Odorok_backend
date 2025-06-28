@@ -1,11 +1,16 @@
 package com.odorok.OdorokApplication.diary.service;
 
+import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAttraction;
+import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
+import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
+import com.odorok.OdorokApplication.gpt.service.GptService;
 import com.odorok.OdorokApplication.repository.InventoryRepository;
 import com.odorok.OdorokApplication.repository.ItemRepository;
+import com.odorok.OdorokApplication.repository.VisitedCourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.Nested;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -115,4 +122,82 @@ public class DiaryServiceImplTest {
         assertEquals(0, response.getCount());
         assertFalse(response.isCanCreateDiary());
     }
+
+    @Nested
+    class InsertGenerationTests {
+        @Mock
+        private VisitedCourseRepository visitedCourseRepository;
+
+        @Mock
+        private GptService gptService;
+
+        @InjectMocks
+        private DiaryServiceImpl diaryService;
+
+        private final long userId = 1L;
+        private final long visitedCourseId = 123L;
+        private final String style = "감성적인";
+
+        private final String rawPromptTemplate =
+                "당신은 여행 기록 작가입니다. 여행자의 스타일은 {style}, 코스명은 {courseName}, 설명은 {courseSummary}, 주변 명소는 {additionalAttractions}입니다.";
+        private List<GptService.Prompt> chatLog;
+        private GptService.Prompt systemPrompt;
+
+
+        @BeforeEach
+        void setUp() {
+            ReflectionTestUtils.setField(diaryService, "rawSystemPrompt",rawPromptTemplate);
+
+            // 프롬프트 생성을 위한 mock 방문지 정보 설정
+            VisitedAttraction a1 = new VisitedAttraction("해운대", "부산 해운대구", "명소1");
+            VisitedAttraction a2 = new VisitedAttraction("광안리", "부산 수영구", "명소2");
+
+            VisitedCourseAndAttraction course = VisitedCourseAndAttraction.builder()
+                    .courseName("남파랑길 1코스")
+                    .courseSummary("해안 절경과 역사적인 장소를 체험할 수 있는 코스")
+                    .visitedAttractions(List.of(a1, a2))
+                    .build();
+
+            when(visitedCourseRepository.findCourseAndAttractionsByVisitedCourseId(userId, visitedCourseId))
+                    .thenReturn(course);
+
+            // 프롬프트 예시
+            systemPrompt = diaryService.buildFinalSystemPrompt(userId, style, visitedCourseId);
+
+            // GPT 응답 mock
+            chatLog = List.of(
+                    systemPrompt,
+                    new GptService.Prompt("assistant", "오늘 여행은 어땠나요?")
+            );
+        }
+
+        @Test
+        void 일지_생성_시작_정상응답_성공() {
+            // given
+            when(gptService.sendPrompt(isNull(), any(GptService.Prompt.class))).thenReturn(chatLog);
+
+            // when
+            DiaryChatResponse response = diaryService.insertGeneration(userId, style, visitedCourseId);
+
+            //then
+            assertNotNull(response);
+            assertEquals("오늘 여행은 어땠나요?", response.getQuestion());
+            assertEquals(2, response.getChatLog().size());
+        }
+
+        @Test
+        void 일지_생성_시작_응답없음_예외발생() {
+            // given
+            when(gptService.sendPrompt(isNull(), any(GptService.Prompt.class))).thenReturn(List.of());
+
+            // when & then
+            RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                    diaryService.insertGeneration(userId, style, visitedCourseId));
+
+            assertEquals("GPT 응답이 비어있음 ", ex.getMessage());
+        }
+
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package com.odorok.OdorokApplication.diary.dto.gpt;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class VisitedCourseAndAttraction {
     private String courseName;
     private String courseSummary;

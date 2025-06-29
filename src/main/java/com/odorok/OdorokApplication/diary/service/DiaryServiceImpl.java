@@ -1,6 +1,7 @@
 package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
+import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
@@ -14,6 +15,7 @@ import com.odorok.OdorokApplication.diary.repository.InventoryRepository;
 import com.odorok.OdorokApplication.diary.repository.ItemRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,9 +66,13 @@ public class DiaryServiceImpl implements DiaryService{
     }
 
     @Override
+    @Transactional
     public DiaryChatResponse insertGeneration(long userId, String style, Long visitedCoursesId) throws GptCommunicationException {
         // 시스템 프롬프트 설정
         GptService.Prompt prompt = buildFinalSystemPrompt(userId, style, visitedCoursesId);
+
+        // 일지 생성권 차감
+        decreaseDiaryGenerationItemCount(userId);
 
         // 대화 시작
         List<GptService.Prompt> chatLog = gptService.sendPrompt(null, prompt);
@@ -74,8 +80,6 @@ public class DiaryServiceImpl implements DiaryService{
             log.warn("GPT 응답이 비어 있음. prompt: {}", prompt);
             throw new RuntimeException("GPT 응답이 비어있음 ");
         }
-        // +) 일지 생성권 차감해야 함...
-
         String newQuestion = chatLog.get(chatLog.size() - 1).getContent();
         return new DiaryChatResponse(newQuestion, chatLog);
     }
@@ -93,5 +97,15 @@ public class DiaryServiceImpl implements DiaryService{
                 .build();
 
         return new GptService.Prompt("system", systemPrompt);
+    }
+
+    public void decreaseDiaryGenerationItemCount(Long userId) {
+        Inventory inventory = inventoryRepository.findByUserIdAndItemId(userId, diaryPermissionItemId)
+                .orElseThrow(() -> new NotFoundException("생성권 아이템이 없습니다."));
+
+        if (inventory.getCount() <= 0) {
+            throw new IllegalStateException("생성권 아이템 수량이 부족합니다.");
+        }
+        inventory.setCount(inventory.getCount() - 1);
     }
 }

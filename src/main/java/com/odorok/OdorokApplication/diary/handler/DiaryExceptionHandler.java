@@ -34,4 +34,9 @@ public class DiaryExceptionHandler {
                 .body(response);
 
     }
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalState(IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(fail(e.getMessage()));
+    }
 }

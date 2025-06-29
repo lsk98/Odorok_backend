@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.diary.service;
 
+import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
@@ -38,6 +39,12 @@ public class DiaryServiceImplTest {
 
     @InjectMocks
     private DiaryServiceImpl diaryService;
+
+    @BeforeEach
+    void setUp() {
+        //
+        ReflectionTestUtils.setField(diaryService, "diaryPermissionItemId", 3L);
+    }
 
     @Test
     public void 일지_상세정보_조회_성공() {
@@ -84,6 +91,7 @@ public class DiaryServiceImplTest {
                 .itemId(itemId)
                 .count(2)
                 .build();
+
         when(inventoryRepository.findByUserIdAndItemId(userId, itemId)).thenReturn(Optional.of(inventory));
 
         // when
@@ -121,6 +129,56 @@ public class DiaryServiceImplTest {
         assertFalse(response.isCanCreateDiary());
     }
 
+    @Test
+    void 일지생성권_차감_일지생성권이_있고_수량이_1개_이상이면_성공() {
+        long userId = 1L;
+        long itemId = 3L;
+
+        Inventory inventory = Inventory.builder()
+                .userId(userId)
+                .itemId(itemId)
+                .count(2)
+                .build();
+
+        when(inventoryRepository.findByUserIdAndItemId(userId, itemId))
+                .thenReturn(Optional.of(inventory));
+
+        diaryService.decreaseDiaryGenerationItemCount(userId);
+
+        assertEquals(1, inventory.getCount());
+    }
+
+    @Test
+    void 일지생성권_차감_생성권이_없으면_NotFoundException_발생() {
+        long userId = 1L;
+        long itemId = 3L;
+        when(inventoryRepository.findByUserIdAndItemId(userId, itemId))
+                .thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(NotFoundException.class, () ->
+                diaryService.decreaseDiaryGenerationItemCount(userId));
+        assertEquals("생성권 아이템이 없습니다.", ex.getMessage());
+
+    }
+
+    @Test
+    void 일지생성권_차감_생성권_수량이_0이면_IllegalStateException_발생() {
+        long userId = 1L;
+        long itemId = 3L;
+        Inventory inventory = Inventory.builder()
+                .userId(userId)
+                .itemId(itemId)
+                .count(0)
+                .build();
+
+        when(inventoryRepository.findByUserIdAndItemId(userId, itemId))
+                .thenReturn(Optional.of(inventory));
+
+        RuntimeException ex = assertThrows(IllegalStateException.class, () ->
+                diaryService.decreaseDiaryGenerationItemCount(userId));
+        assertEquals("생성권 아이템 수량이 부족합니다.", ex.getMessage());
+    }
+
     @Nested
     class InsertGenerationTests {
         @Mock
@@ -129,10 +187,14 @@ public class DiaryServiceImplTest {
         @Mock
         private GptService gptService;
 
+        @Mock
+        private InventoryRepository inventoryRepository;
+
         @InjectMocks
         private DiaryServiceImpl diaryService;
 
         private final long userId = 1L;
+        private final long itemId = 3L;
         private final long visitedCourseId = 123L;
         private final String style = "감성적인";
 
@@ -144,6 +206,7 @@ public class DiaryServiceImplTest {
 
         @BeforeEach
         void setUp() {
+            ReflectionTestUtils.setField(diaryService, "diaryPermissionItemId", itemId);
             ReflectionTestUtils.setField(diaryService, "rawSystemPrompt",rawPromptTemplate);
 
             // 프롬프트 생성을 위한 mock 방문지 정보 설정
@@ -167,6 +230,15 @@ public class DiaryServiceImplTest {
                     systemPrompt,
                     new GptService.Prompt("assistant", "오늘 여행은 어땠나요?")
             );
+
+            Inventory inventory = Inventory.builder()
+                    .userId(userId)
+                    .itemId(itemId)
+                    .count(2)
+                    .build();
+
+            when(inventoryRepository.findByUserIdAndItemId(userId, itemId))
+                    .thenReturn(Optional.of(inventory));
         }
 
         @Test
@@ -194,7 +266,6 @@ public class DiaryServiceImplTest {
 
             assertEquals("GPT 응답이 비어있음 ", ex.getMessage());
         }
-
     }
 
 

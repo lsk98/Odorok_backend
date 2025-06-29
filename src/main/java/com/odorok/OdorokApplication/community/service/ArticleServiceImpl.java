@@ -22,6 +22,7 @@ public class ArticleServiceImpl implements ArticleService{
 
     private final ArticleImageService articleImageService;
     private final ArticleRepository articleRepository;
+    private final ArticleTransactionService articleTransactionService;
 
     @Override
     public List<ArticleSummary> findByCondition(ArticleSearchCondition condition) {
@@ -35,18 +36,13 @@ public class ArticleServiceImpl implements ArticleService{
                         .boardType(request.getBoardType()).notice(request.getNotice())
                         .diseaseId(request.getDiseaseId()).courseId(request.getCourseId()).userId(userId).build();
         try {
-            insertArticleTransactional(article, urls);  // 트랜잭션 메서드
+            articleTransactionService.insertArticleTransactional(article, urls, userId);  // 트랜잭션 메서드
         } catch (Exception e) {
             articleImageService.deleteImages(urls); // 수동 롤백
             throw e;
         }
     }
 
-    @Transactional
-    private void insertArticleTransactional(Article article,List<String> urls){
-        articleRepository.save(article);
-        Long articleId = article.getId();
-        articleImageService.insertArticleImageUrl(articleId,urls);
-    }
+
 
 }

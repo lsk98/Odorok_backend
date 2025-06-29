@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.repository;
+package com.odorok.OdorokApplication.diary.repository;
 
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;

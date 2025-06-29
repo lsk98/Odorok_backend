@@ -1,5 +1,8 @@
-package com.odorok.OdorokApplication.commons.exception;
+package com.odorok.OdorokApplication.diary.handler;
 
+import com.odorok.OdorokApplication.commons.exception.BadRequestException;
+import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
+import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

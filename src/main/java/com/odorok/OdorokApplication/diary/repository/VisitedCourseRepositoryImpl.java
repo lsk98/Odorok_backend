@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.repository;
+package com.odorok.OdorokApplication.diary.repository;
 
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;

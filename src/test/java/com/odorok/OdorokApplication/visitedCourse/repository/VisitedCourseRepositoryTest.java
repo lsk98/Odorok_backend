@@ -1,14 +1,13 @@
 package com.odorok.OdorokApplication.visitedCourse.repository;
 
-import com.odorok.OdorokApplication.config.QueryDslConfig;
+import com.odorok.OdorokApplication.commons.querydsl.config.QueryDslConfig;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.domain.VisitedAttraction;
 import com.odorok.OdorokApplication.domain.VisitedCourse;
 import com.odorok.OdorokApplication.draftDomain.Attraction;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
-import com.odorok.OdorokApplication.repository.VisitedCourseRepository;
-import jakarta.transaction.Transactional;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

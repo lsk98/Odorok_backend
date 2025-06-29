@@ -3,7 +3,7 @@ package com.odorok.OdorokApplication.diary.service;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.gpt.service.GptService;
-import com.odorok.OdorokApplication.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

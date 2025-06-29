@@ -8,8 +8,8 @@ import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckRespo
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.gpt.service.GptService;
-import com.odorok.OdorokApplication.repository.InventoryRepository;
-import com.odorok.OdorokApplication.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.diary.repository.InventoryRepository;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

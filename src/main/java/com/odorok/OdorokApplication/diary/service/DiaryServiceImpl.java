@@ -10,17 +10,15 @@ import com.odorok.OdorokApplication.diary.util.PromptTemplate;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.draftDomain.Item;
 import com.odorok.OdorokApplication.gpt.service.GptService;
-import com.odorok.OdorokApplication.repository.InventoryRepository;
-import com.odorok.OdorokApplication.repository.ItemRepository;
-import com.odorok.OdorokApplication.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.diary.repository.InventoryRepository;
+import com.odorok.OdorokApplication.diary.repository.ItemRepository;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor

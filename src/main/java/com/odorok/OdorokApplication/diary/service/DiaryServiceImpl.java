@@ -81,8 +81,8 @@ public class DiaryServiceImpl implements DiaryService{
             log.warn("GPT 응답이 비어 있음. prompt: {}", prompt);
             throw new RuntimeException("GPT 응답이 비어있음 ");
         }
-        String newQuestion = chatLog.get(chatLog.size() - 1).getContent();
-        return new DiaryChatResponse(newQuestion, chatLog);
+        String newContent = chatLog.get(chatLog.size() - 1).getContent();
+        return new DiaryChatResponse(newContent, chatLog);
     }
 
     public GptService.Prompt buildFinalSystemPrompt(long userId, String style, Long visitedCoursesId) {

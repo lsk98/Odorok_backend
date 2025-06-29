@@ -3,6 +3,7 @@ package com.odorok.OdorokApplication.diary.service;
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
@@ -107,5 +108,18 @@ public class DiaryServiceImpl implements DiaryService{
             throw new IllegalStateException("생성권 아이템 수량이 부족합니다.");
         }
         inventory.setCount(inventory.getCount() - 1);
+    }
+
+    @Override
+    public DiaryChatResponse insertAnswer(long userId, DiaryChatAnswerRequest request) {
+        // answer로 프롬프트 생성
+        GptService.Prompt newPrompt = new GptService.Prompt("user", request.getAnswer());
+        List<GptService.Prompt> chatLog = gptService.sendPrompt(request.getChatLog(), newPrompt);
+        if (chatLog.isEmpty()) {
+            log.warn("GPT 응답이 비어 있음. chatLog: {}\nprompt: {}", chatLog, newPrompt);
+            throw new RuntimeException("GPT 응답이 비어있음 ");
+        }
+        String newContent = chatLog.get(chatLog.size() - 1).getContent();
+        return new DiaryChatResponse(newContent, chatLog);
     }
 }

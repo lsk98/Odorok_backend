@@ -29,13 +29,13 @@ public class GptServiceImpl implements GptService{
 
     @Override
     public List<Prompt> sendPrompt(List<Prompt> context, Prompt prompt) {
-        // context를 조각내어 여러 개의 Prompt로 만든다?
-        // prompt 를 context에 붙인다.
-        List<Prompt> fullCtx;
-        if(context != null) fullCtx = new ArrayList<>(context);
-        else fullCtx = new ArrayList<>();
+            // context를 조각내어 여러 개의 Prompt로 만든다?
+            // prompt 를 context에 붙인다.
+            List<Prompt> fullCtx;
+            if(context != null) fullCtx = new ArrayList<>(context);
+            else fullCtx = new ArrayList<>();
 
-        fullCtx.add(prompt);
+            fullCtx.add(prompt);
         GptRequest requestObj = new GptRequest(MODEL, fullCtx, TEMPERATURE);
         Mono<GptResponse> responseMono = client.post().bodyValue(requestObj).retrieve().bodyToMono(GptResponse.class);
         GptResponse response = responseMono.block();
@@ -44,6 +44,7 @@ public class GptServiceImpl implements GptService{
 //            throw new RuntimeException("no response from gpt server");
         }
         log.debug("gpt response: {}", response);
+        log.debug("gpt tokens 사용량: {}", response.getUsage());
         Message message = response.getChoices().get(0).getMessage();
         fullCtx.add(new Prompt(message.getRole(), message.getContent()));
 

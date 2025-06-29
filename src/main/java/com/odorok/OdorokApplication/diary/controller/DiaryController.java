@@ -3,6 +3,7 @@ package com.odorok.OdorokApplication.diary.controller;
 import com.odorok.OdorokApplication.commons.exception.BadRequestException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
@@ -58,8 +59,19 @@ public class DiaryController {
 //        long userId = user.getUser().getId();
         long userId = 1L;
 
-        DiaryChatResponse charResponse =  diaryService.insertGeneration(userId, style, visitedCourseId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(success("IN_PROGRESS", "일지 생성 요청 성공", charResponse));
+        DiaryChatResponse chatResponse =  diaryService.insertGeneration(userId, style, visitedCourseId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(success("IN_PROGRESS", "일지 생성 요청 성공", chatResponse));
+    }
+
+    @PostMapping("/answers")
+    public ResponseEntity<?> registAnswer(@RequestBody DiaryChatAnswerRequest request
+//            ,@AuthenticationPrincipal CustomUserDetails user
+    ) {
+//        long userId = user.getUser().getId();
+        long userId = 1L;
+        DiaryChatResponse chatResponse = diaryService.insertAnswer(userId, request);
+        String status = chatResponse.getQuestion().endsWith("<END>") ? "DONE" : "IN_PROGRESS";
+        return ResponseEntity.status(HttpStatus.OK).body(success(status, "답변 제출 및 새 질문 요청 성공", chatResponse));
     }
 
 }

@@ -38,21 +38,25 @@ public class DiaryController {
     }
 
     @GetMapping("/permission")
-    public ResponseEntity<?> searchDiaryGeneratePermission(@AuthenticationPrincipal CustomUserDetails user) {
-        long userId = user.getUser().getId();
+    public ResponseEntity<?> searchDiaryGeneratePermission(
+//            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+//        long userId = user.getUser().getId();
+        long userId = 1L;
         DiaryPermissionCheckResponse response = diaryService.findDiaryPermission(userId);
         return ResponseEntity.status(HttpStatus.OK).body(success("일지 생성 가능 조회 성공", response));
     }
 
     @GetMapping("/generation/{visitedCourseId}")
     public ResponseEntity<?> registGeneration(@RequestParam String style,
-                                              @PathVariable Long visitedCourseId,
-                                              @AuthenticationPrincipal CustomUserDetails user) {
+                                              @PathVariable Long visitedCourseId
+//                                              ,@AuthenticationPrincipal CustomUserDetails user
+    ) {
         if (style == null || style.isBlank()) {
             throw new BadRequestException("스타일은 필수 입력값입니다.");
         }
-
-        long userId = user.getUser().getId();
+//        long userId = user.getUser().getId();
+        long userId = 1L;
 
         DiaryChatResponse charResponse =  diaryService.insertGeneration(userId, style, visitedCourseId);
         return ResponseEntity.status(HttpStatus.CREATED).body(success("IN_PROGRESS", "일지 생성 요청 성공", charResponse));

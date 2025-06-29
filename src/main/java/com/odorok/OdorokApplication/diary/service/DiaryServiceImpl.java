@@ -35,7 +35,7 @@ public class DiaryServiceImpl implements DiaryService{
 
     private Long diaryPermissionItemId;
 
-    @Value("${gpt.system-prompt")
+    @Value("${gpt.system-prompt}")
     private String rawSystemPrompt;
 
     // 일지 생성권 itemId 캐싱.

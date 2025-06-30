@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VisitedCourseRepository extends JpaRepository<VisitedCourse, Long> {
+public interface VisitedCourseRepository extends JpaRepository<VisitedCourse, Long>, VisitedCourseRepositoryCustom {
     boolean existsByUserIdAndCourseId(Long userId, Long courseId);
 }

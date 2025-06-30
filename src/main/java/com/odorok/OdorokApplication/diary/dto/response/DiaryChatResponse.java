@@ -9,6 +9,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class DiaryChatResponse {
-    private String question;
+    private String content;
     private List<GptService.Prompt> chatLog;
 }

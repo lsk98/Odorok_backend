@@ -70,7 +70,7 @@ public class DiaryController {
 //        long userId = user.getUser().getId();
         long userId = 1L;
         DiaryChatResponse chatResponse = diaryService.insertAnswer(userId, request);
-        String status = chatResponse.getQuestion().endsWith("<END>") ? "DONE" : "IN_PROGRESS";
+        String status = chatResponse.getContent().endsWith("<END>") ? "DONE" : "IN_PROGRESS";
         return ResponseEntity.status(HttpStatus.OK).body(success(status, "답변 제출 및 새 질문 요청 성공", chatResponse));
     }
 

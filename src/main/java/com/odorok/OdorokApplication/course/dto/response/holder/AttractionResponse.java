@@ -13,6 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AttractionResponse {
-    private Integer contentTypeId;
     private List<AttractionSummary> items;
 }

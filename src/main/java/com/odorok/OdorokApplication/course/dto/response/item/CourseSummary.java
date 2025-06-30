@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.course.dto.response.item;
 
+import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,20 @@ public class CourseSummary {
     private LocalDate modifiedAt; // : '2024-03-01', // 수정일
     private Integer reward; // : 300, // 보상 점수
     private Boolean visited; // : false // 방문 여부
+
+    public CourseSummary(Course course) {
+        this.courseId = course.getId();
+        this.courseIdx = course.getIdx();
+        this.courseName = course.getName();
+        this.sidoCode = course.getSidoCode();
+        this.sigunguCode = course.getSigunguCode();
+        this.distance = course.getDistance();
+        this.reqTime = course.getReqTime();
+        this.level = course.getLevel();
+        this.cycle = course.getCycle();
+        this.brdDiv = course.getBrdDiv();
+        this.createdAt = course.getCreatedAt().toLocalDate();
+        this.modifiedAt = course.getModifiedAt().toLocalDate();
+        this.reward = course.getReward();
+    }
 }

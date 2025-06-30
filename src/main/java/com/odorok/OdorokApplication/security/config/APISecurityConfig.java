@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.security.config;
 
+import com.odorok.OdorokApplication.security.jwt.JWTUtil;
 import com.odorok.OdorokApplication.security.jwt.filter.JWTAuthenticationFilter;
 import com.odorok.OdorokApplication.security.jwt.filter.JWTVerificationFilter;
 import com.odorok.OdorokApplication.security.jwt.filter.SecurityExceptionHandlingFilter;
@@ -25,6 +26,11 @@ import java.util.Arrays;
 
 @Configuration
 public class APISecurityConfig {
+    @Bean
+    JWTUtil jwtUtil() {
+        return new JWTUtil();
+    }
+
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();

@@ -1,21 +1,6 @@
 package com.odorok.OdorokApplication.diary.service;
 
-import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
-import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
-import com.odorok.OdorokApplication.gpt.service.GptService;
-import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 //@SpringBootTest()
 public class DiaryServiceGptChatTest {

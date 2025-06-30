@@ -11,7 +11,6 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
 
-@Component
 @Slf4j
 public class JWTUtil {
     private final SecretKey key;

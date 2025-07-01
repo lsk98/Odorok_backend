@@ -43,7 +43,7 @@ public class DiaryController {
 //            @AuthenticationPrincipal CustomUserDetails user
     ) {
 //        long userId = user.getUser().getId();
-        long userId = 1L;
+        long userId = 1L; // 테스트용
         DiaryPermissionCheckResponse response = diaryService.findDiaryPermission(userId);
         return ResponseEntity.status(HttpStatus.OK).body(success("일지 생성 가능 조회 성공", response));
     }
@@ -57,7 +57,7 @@ public class DiaryController {
             throw new BadRequestException("스타일은 필수 입력값입니다.");
         }
 //        long userId = user.getUser().getId();
-        long userId = 1L;
+        long userId = 1L; // 테스트용
 
         DiaryChatResponse chatResponse =  diaryService.insertGeneration(userId, style, visitedCourseId);
         return ResponseEntity.status(HttpStatus.CREATED).body(success("IN_PROGRESS", "일지 생성 요청 성공", chatResponse));
@@ -68,10 +68,12 @@ public class DiaryController {
 //            ,@AuthenticationPrincipal CustomUserDetails user
     ) {
 //        long userId = user.getUser().getId();
-        long userId = 1L;
+        long userId = 1L; // 테스트용
         DiaryChatResponse chatResponse = diaryService.insertAnswer(userId, request);
-        String status = chatResponse.getContent().endsWith("<END>") ? "DONE" : "IN_PROGRESS";
-        return ResponseEntity.status(HttpStatus.OK).body(success(status, "답변 제출 및 새 질문 요청 성공", chatResponse));
+        ResponseRoot<?> response = chatResponse.getContent().endsWith("<END>") ?
+                successDone("일지 생성 완료", chatResponse) :
+                successInProgress("답변 제출 및 새 질문 요청 성공", chatResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.odorok.OdorokApplication.diary.dto.response;
+package com.odorok.OdorokApplication.diary.dto.request;
 
 import com.odorok.OdorokApplication.gpt.service.GptService;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class DiaryChatResponse {
-    private String content;
+public class DiaryChatAnswerRequest {
+    private String answer;
     private List<GptService.Prompt> chatLog;
 }

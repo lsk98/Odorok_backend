@@ -36,7 +36,7 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
                         attractions.overview
                 ))
                 .from(visitedCourses)
-                .join(visitedAttractions).on(visitedAttractions.vcourseId.eq(visitedCourseId))
+                .join(visitedAttractions).on(visitedAttractions.vcourseId.eq(visitedCourses.id))
                 .join(attractions).on(attractions.id.eq(visitedAttractions.attractionId))
                 .where(visitedCourses.id.eq(visitedCourseId),
                         visitedCourses.userId.eq(userId))

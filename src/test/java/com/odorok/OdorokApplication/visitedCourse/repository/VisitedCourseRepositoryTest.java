@@ -1,6 +1,7 @@
 package com.odorok.OdorokApplication.visitedCourse.repository;
 
 import com.odorok.OdorokApplication.commons.querydsl.config.QueryDslConfig;
+import com.odorok.OdorokApplication.course.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;

@@ -2,6 +2,7 @@ package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
+import com.odorok.OdorokApplication.course.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;

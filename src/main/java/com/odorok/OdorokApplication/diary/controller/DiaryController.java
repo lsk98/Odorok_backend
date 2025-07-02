@@ -3,6 +3,7 @@ package com.odorok.OdorokApplication.diary.controller;
 import com.odorok.OdorokApplication.commons.exception.BadRequestException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
@@ -38,24 +39,41 @@ public class DiaryController {
     }
 
     @GetMapping("/permission")
-    public ResponseEntity<?> searchDiaryGeneratePermission(@AuthenticationPrincipal CustomUserDetails user) {
-        long userId = user.getUser().getId();
+    public ResponseEntity<?> searchDiaryGeneratePermission(
+//            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+//        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
         DiaryPermissionCheckResponse response = diaryService.findDiaryPermission(userId);
         return ResponseEntity.status(HttpStatus.OK).body(success("일지 생성 가능 조회 성공", response));
     }
 
     @GetMapping("/generation/{visitedCourseId}")
     public ResponseEntity<?> registGeneration(@RequestParam String style,
-                                              @PathVariable Long visitedCourseId,
-                                              @AuthenticationPrincipal CustomUserDetails user) {
+                                              @PathVariable Long visitedCourseId
+//                                              ,@AuthenticationPrincipal CustomUserDetails user
+    ) {
         if (style == null || style.isBlank()) {
             throw new BadRequestException("스타일은 필수 입력값입니다.");
         }
+//        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
 
-        long userId = user.getUser().getId();
+        DiaryChatResponse chatResponse =  diaryService.insertGeneration(userId, style, visitedCourseId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(success("IN_PROGRESS", "일지 생성 요청 성공", chatResponse));
+    }
 
-        DiaryChatResponse charResponse =  diaryService.insertGeneration(userId, style, visitedCourseId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(success("IN_PROGRESS", "일지 생성 요청 성공", charResponse));
+    @PostMapping("/answers")
+    public ResponseEntity<?> registAnswer(@RequestBody DiaryChatAnswerRequest request
+//            ,@AuthenticationPrincipal CustomUserDetails user
+    ) {
+//        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
+        DiaryChatResponse chatResponse = diaryService.insertAnswer(userId, request);
+        ResponseRoot<?> response = chatResponse.getContent().endsWith("<END>") ?
+                successDone("일지 생성 완료", chatResponse) :
+                successInProgress("답변 제출 및 새 질문 요청 성공", chatResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

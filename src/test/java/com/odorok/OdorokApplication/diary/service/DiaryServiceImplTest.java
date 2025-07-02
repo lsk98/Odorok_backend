@@ -3,6 +3,7 @@ package com.odorok.OdorokApplication.diary.service;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
@@ -10,7 +11,6 @@ import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.gpt.service.GptService;
 import com.odorok.OdorokApplication.diary.repository.InventoryRepository;
-import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Nested;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -179,6 +180,7 @@ public class DiaryServiceImplTest {
         assertEquals("생성권 아이템 수량이 부족합니다.", ex.getMessage());
     }
 
+
     @Nested
     class InsertGenerationTests {
         @Mock
@@ -251,7 +253,7 @@ public class DiaryServiceImplTest {
 
             //then
             assertNotNull(response);
-            assertEquals("오늘 여행은 어땠나요?", response.getQuestion());
+            assertEquals("오늘 여행은 어땠나요?", response.getContent());
             assertEquals(2, response.getChatLog().size());
         }
 
@@ -268,5 +270,67 @@ public class DiaryServiceImplTest {
         }
     }
 
+    @Nested
+    class InsertAnswerTest{
+        @Mock
+        private GptService gptService;
+
+        @InjectMocks
+        private DiaryServiceImpl diaryService;
+
+        private final long userId = 1L;
+
+        private final String rawPromptTemplate =
+                "당신은 여행 기록 작가입니다. 여행자의 스타일은 {style}, 코스명은 {courseName}, 설명은 {courseSummary}, 주변 명소는 {additionalAttractions}입니다.";
+        private List<GptService.Prompt> chatLog;
+        private String newAnswer;
+        private List<GptService.Prompt> returnChatLog;
+
+        @BeforeEach
+        void setUp() {
+            ReflectionTestUtils.setField(diaryService, "rawSystemPrompt",rawPromptTemplate);
+            
+            // GPT 응답 mock
+            chatLog = List.of(
+                    new GptService.Prompt("system", "시스템 프롬프트"),
+                    new GptService.Prompt("assistant", "오늘 여행은 어땠나요?")
+            );
+
+            newAnswer = "날씨가 좋아서 걷기 좋았어";
+            GptService.Prompt prompt= new GptService.Prompt("user", newAnswer);
+            GptService.Prompt answerPrompt = new GptService.Prompt("assistant", "날씨가 좋았군요. 그 때 감정은 어땠나요?");
+            returnChatLog = new ArrayList<>(chatLog);
+            returnChatLog.add(prompt);
+            returnChatLog.add(answerPrompt);
+        }
+
+        @Test
+        void 사용자_답변_후_gpt_호출_성공() {
+            // given
+            when(gptService.sendPrompt(anyList(), any(GptService.Prompt.class))).thenReturn(returnChatLog);
+
+            // when
+            DiaryChatResponse response = diaryService.insertAnswer(userId, new DiaryChatAnswerRequest(newAnswer, chatLog));
+
+            // then
+            assertNotNull(response);
+            List<GptService.Prompt> responseChatLog = response.getChatLog();
+            assertEquals(responseChatLog.get(responseChatLog.size() - 1).getRole(), "assistant");
+            assertEquals(responseChatLog.get(responseChatLog.size() - 2).getRole(), "user");
+            verify(gptService, times(1)).sendPrompt(anyList(), any(GptService.Prompt.class));
+        }
+
+        @Test
+        void 사용자_답변_후_gpt_호출_응답없음_예외발생() {
+            // given
+            when(gptService.sendPrompt(anyList(), any(GptService.Prompt.class))).thenReturn(List.of());
+
+            // when & then
+            RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                    diaryService.insertAnswer(userId, new DiaryChatAnswerRequest(newAnswer, chatLog)));
+
+            assertEquals("GPT 응답이 비어있음 ", ex.getMessage());
+        }
+    }
 
 }

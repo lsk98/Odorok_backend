@@ -1,6 +1,6 @@
 package com.odorok.OdorokApplication.course.service;
 
-import com.odorok.OdorokApplication.course.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

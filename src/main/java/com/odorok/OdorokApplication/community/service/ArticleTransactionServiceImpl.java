@@ -25,7 +25,7 @@ public class ArticleTransactionServiceImpl implements ArticleTransactionService{
         Long articleId = article.getId();
         articleImageService.insertArticleImageUrl(articleId,urls);
         Profile profile = profileRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("프로필을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("점수 추가 실패"));
         profile.setMileage(profile.getMileage()+30);
         profile.setActivityPoint(profile.getActivityPoint()+30);
     }

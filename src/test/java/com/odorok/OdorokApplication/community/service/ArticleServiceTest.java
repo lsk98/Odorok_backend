@@ -30,6 +30,8 @@ class ArticleServiceTest {
     ArticleImageService articleImageService;
     @Mock
     ArticleRepository articleRepository;
+    @Mock
+    ArticleTransactionService articleTransactionService;
     @InjectMocks
     ArticleServiceImpl articleService;
 
@@ -73,8 +75,7 @@ class ArticleServiceTest {
         //then
         articleService.insertArticle(new ArticleRegistRequest(),images,1L);
         //트랜잭션 메서드까지 전부 수행되었는지 확인
-        verify(articleRepository,times(1)).save(article);
-        verify(articleImageService,times(1)).insertArticleImageUrl(any(),any());
+        verify(articleTransactionService,times(1)).insertArticleTransactional(article, urls, 1L);
     }
 
     @Test
@@ -85,7 +86,9 @@ class ArticleServiceTest {
         List<MultipartFile> images = List.of();
         //when
         when(articleImageService.insertArticleImages(1L,images)).thenReturn(urls);
-        when(articleRepository.save(article)).thenThrow(new TransactionSystemException("트랜잭션 오류"));
+        doThrow(new TransactionSystemException("트랜잭션 오류"))
+                .when(articleTransactionService)
+                .insertArticleTransactional(article, urls, 1L);
         //then
         assertThrows(TransactionSystemException.class, () ->
                 articleService.insertArticle(new ArticleRegistRequest(), images, 1L));

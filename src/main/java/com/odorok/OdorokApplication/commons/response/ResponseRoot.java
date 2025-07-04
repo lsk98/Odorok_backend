@@ -7,6 +7,7 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ResponseRoot<T> {
     private String status;  // "success" or "fail"

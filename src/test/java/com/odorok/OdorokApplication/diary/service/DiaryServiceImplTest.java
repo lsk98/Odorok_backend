@@ -1,7 +1,7 @@
 package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
-import com.odorok.OdorokApplication.course.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
@@ -9,6 +9,7 @@ import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.gpt.service.GptService;
 import com.odorok.OdorokApplication.diary.repository.InventoryRepository;

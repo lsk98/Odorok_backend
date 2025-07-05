@@ -11,6 +11,7 @@ import com.odorok.OdorokApplication.course.repository.PathCoordRepository;
 import com.odorok.OdorokApplication.course.repository.RouteRepository;
 import jakarta.transaction.Transactional;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@EqualsAndHashCode(callSuper = false)
 @Slf4j
 public class DurunubiDataServiceImpl implements DurunubiDataService{
     private final WebClient client;

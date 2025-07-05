@@ -23,16 +23,42 @@ import org.springframework.web.bind.annotation.RestController;
 public class CourseApiController {
     private final CourseQueryService courseQueryService;
     private final UserService userService;
+
     @GetMapping("/region")
     public ResponseEntity<ResponseRoot<CourseResponse>> searchByRegionCode(@RequestParam("sidoCode") Integer sidoCode,
                                                                            @RequestParam("sigunguCode") Integer sigunguCode,
                                                                            @RequestParam(value = "email", required = false) String email,
-                                                                           @PageableDefault(size = 10, page = 0, sort = "created_at") Pageable pageable) {
-        // 페이징 넣기.
-        log.debug("지역 코스 검색 리퀘스트 {}, {}, {}, {}", sidoCode, sigunguCode, email, pageable.getPageNumber(), pageable.getPageSize());
-        Long userId = userService.selectByEmail(email).getId();
-        CourseResponse response = new CourseResponse();
-        response.setItems(courseQueryService.findCoursesByRegion(sidoCode, sigunguCode, userId, pageable));
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponseBuilder.success("", response));
+                                                                           @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable) {
+            // 페이징 넣기.
+            log.debug("지역 코스 검색 리퀘스트 {}, {}, {}, {}, {}", sidoCode, sigunguCode, email, pageable.getPageNumber(), pageable.getPageSize());
+            Long userId = null;
+            if(email != null) userId = userService.selectByEmail(email).getId();
+            CourseResponse response = new CourseResponse();
+            try {
+                response.setItems(courseQueryService.findCoursesByRegion(sidoCode, sigunguCode, userId, pageable));
+            } catch(RuntimeException e) {
+                log.debug(e.getMessage());
+                e.printStackTrace();
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(CommonResponseBuilder.success("", response));
     }
+    
+    // 전체 코스 리스트
+    
+    // 별점 Top 코스 리스트
+    
+    // 방문수 Top 코스 리스트
+    
+    // 사용자 질병 코스 리스트
+    
+    // 사용자 지역 코스 리스트
+    
+    // 방문 예정 코스 조회
+    
+    // 코스 리뷰 조회
+    
+    // 코스 상세 조회
+    
+    // 예정 등록
+    
 }

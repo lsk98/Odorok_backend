@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseScheduleResponse {
+public class CourseScheduleResponse { // 코스 방문 계획 조회시
     private List<VisitationScheduleSummary> schedule;
 }

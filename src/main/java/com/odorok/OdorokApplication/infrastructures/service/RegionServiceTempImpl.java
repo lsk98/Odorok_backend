@@ -2,8 +2,8 @@ package com.odorok.OdorokApplication.infrastructures.service;
 
 import com.odorok.OdorokApplication.infrastructures.domain.Sido;
 import com.odorok.OdorokApplication.infrastructures.domain.Sigungu;
-import com.odorok.OdorokApplication.course.repository.SidoRepository;
-import com.odorok.OdorokApplication.course.repository.SigunguRepository;
+import com.odorok.OdorokApplication.region.repository.SidoRepository;
+import com.odorok.OdorokApplication.region.repository.SigunguRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

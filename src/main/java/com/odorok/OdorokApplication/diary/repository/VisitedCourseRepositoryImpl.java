@@ -2,6 +2,8 @@ package com.odorok.OdorokApplication.diary.repository;
 
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
+import com.odorok.OdorokApplication.diary.dto.response.VisitedCourseSummary;
+import com.odorok.OdorokApplication.domain.QDiary;
 import com.odorok.OdorokApplication.domain.QVisitedAttraction;
 import com.odorok.OdorokApplication.domain.QVisitedCourse;
 import com.odorok.OdorokApplication.draftDomain.QAttraction;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -25,6 +28,7 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
     QCourse courses = QCourse.course;
     QVisitedAttraction visitedAttractions = QVisitedAttraction.visitedAttraction;
     QAttraction attractions = QAttraction.attraction;
+    QDiary diary = QDiary.diary;
 
     @Override
     public List<VisitedAdditionalAttraction> findVisitedAttractionByVisitedCourseId(Long userId, Long visitedCourseId) {
@@ -61,5 +65,27 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
                 tuple.get(courses.summary),
                 visitedAttractionList
         );
+    }
+
+    @Override
+    public List<VisitedCourseSummary> findVisitedCourseWithoutDiaryByUserId(Long userId) {
+        List<Tuple> tuples =  jpaQueryFactory
+                .select(visitedCourses.id, visitedCourses.visitedAt, courses.name)
+                .from(visitedCourses)
+                .join(courses).on(courses.id.eq(visitedCourses.courseId))
+                .leftJoin(diary).on(diary.vcourseId.eq(visitedCourses.id))
+                .where(diary.vcourseId.isNull(),
+                        visitedCourses.isFinished.isTrue(),
+                        visitedCourses.userId.eq(userId))
+                .fetch();
+        if (tuples == null) return null;
+        List<VisitedCourseSummary> result = tuples.stream()
+                .map(tuple -> new VisitedCourseSummary(
+                        tuple.get(visitedCourses.id),
+                        tuple.get(visitedCourses.visitedAt),
+                        tuple.get(courses.name)
+                ))
+                .collect(Collectors.toList());
+        return result;
     }
 }

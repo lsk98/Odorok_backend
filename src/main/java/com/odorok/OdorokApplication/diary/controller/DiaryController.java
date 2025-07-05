@@ -7,6 +7,7 @@ import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
+import com.odorok.OdorokApplication.diary.dto.response.VisitedCourseWithoutDiaryResponse;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
 import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.odorok.OdorokApplication.commons.response.CommonResponseBuilder.*;
 
@@ -73,6 +76,16 @@ public class DiaryController {
         ResponseRoot<?> response = chatResponse.getContent().endsWith("<END>") ?
                 successDone("일지 생성 완료", chatResponse) :
                 successInProgress("답변 제출 및 새 질문 요청 성공", chatResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/available-course")
+    public ResponseEntity<?> searchVisitedCourseWithoutDiary(
+//            @AuthenticationPrincipal CustomUserDetails user;
+    ) {
+//        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
+        VisitedCourseWithoutDiaryResponse response = diaryService.findVisitedCourseWithoutDiaryByUserId(userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

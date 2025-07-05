@@ -2,12 +2,10 @@ package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
+import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.util.PromptTemplate;
@@ -124,5 +122,11 @@ public class DiaryServiceImpl implements DiaryService{
         }
         String newContent = chatLog.get(chatLog.size() - 1).getContent();
         return new DiaryChatResponse(newContent, chatLog);
+    }
+
+    @Override
+    public VisitedCourseWithoutDiaryResponse findVisitedCourseWithoutDiaryByUserId(long userId) {
+        List<VisitedCourseSummary> result = visitedCourseRepository.findVisitedCourseWithoutDiaryByUserId(userId);
+        return new VisitedCourseWithoutDiaryResponse(result);
     }
 }

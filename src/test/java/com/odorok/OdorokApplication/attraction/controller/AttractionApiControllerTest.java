@@ -8,17 +8,12 @@ import com.odorok.OdorokApplication.attraction.service.AttractionQueryService;
 import com.odorok.OdorokApplication.security.jwt.filter.JWTAuthenticationFilter;
 import com.odorok.OdorokApplication.security.jwt.filter.JWTVerificationFilter;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,7 +22,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.xml.transform.Result;
 import java.util.List;
 import java.util.Map;
 
@@ -126,7 +120,19 @@ class AttractionApiControllerTest {
     }
 
     @Test
-    public void 없는_명소를_요청한다() {
+    public void 없는_명소를_요청한다() throws Exception{
+// given
+        String url = UriComponentsBuilder.fromUriString(URI).port(LOCAL_PORT)
+                .path(COMMON_REQUEST_PATH + ATTR_DETAIL_PATH)
+                .queryParam("attractionId", "1").toUriString();
+        Mockito.when(attractionQueryService.queryAttractionDetail(1L)).thenThrow(
+                new IllegalArgumentException("없는 '명소' 식별자 = " + 1L));
 
+        // when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(url));
+
+        // then
+        resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.data").doesNotExist());
     }
 }

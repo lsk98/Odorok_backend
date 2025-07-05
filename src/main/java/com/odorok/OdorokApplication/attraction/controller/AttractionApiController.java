@@ -52,8 +52,14 @@ public class AttractionApiController {
             @RequestParam("attractionId") Long id
     ) {
         log.debug("/api/attractions/detail : 명소 상세 정보 요청. (attractionId : {})", id);
+        try {
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                    .body(CommonResponseBuilder.success("명소 상세 조회 성공", attractionQueryService.queryAttractionDetail(id)));
+        } catch(IllegalArgumentException e) {
 
-        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
-                .body(CommonResponseBuilder.success("명소 상세 조회 성공", attractionQueryService.queryAttractionDetail(id)));
+            log.debug("예외 발생 = {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                    .body(CommonResponseBuilder.fail(e.getMessage()));
+        }
     }
 }

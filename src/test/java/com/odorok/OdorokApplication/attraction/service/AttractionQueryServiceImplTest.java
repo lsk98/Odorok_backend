@@ -87,4 +87,12 @@ class AttractionQueryServiceImplTest {
         assertThat(result.getOverview()).isEqualTo(DUMMY_OVERVIEW);
         Mockito.verify(attractionRepository, Mockito.times(1)).findById(1L);
     }
+
+    @Test
+    public void 없는_명소_상세_조회에_실패한다() {
+        Mockito.when(attractionRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> attractionQueryService.queryAttractionDetail(1L));
+        Mockito.verify(attractionRepository, Mockito.times(1)).findById(1L);
+    }
 }

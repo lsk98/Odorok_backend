@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CourseApiController {
     private final CourseQueryService courseQueryService;
     private final UserService userService;
+
     @GetMapping("/region")
     public ResponseEntity<ResponseRoot<CourseResponse>> searchByRegionCode(@RequestParam("sidoCode") Integer sidoCode,
                                                                            @RequestParam("sigunguCode") Integer sigunguCode,
@@ -41,4 +42,23 @@ public class CourseApiController {
             }
             return ResponseEntity.status(HttpStatus.OK).body(CommonResponseBuilder.success("", response));
     }
+    
+    // 전체 코스 리스트
+    
+    // 별점 Top 코스 리스트
+    
+    // 방문수 Top 코스 리스트
+    
+    // 사용자 질병 코스 리스트
+    
+    // 사용자 지역 코스 리스트
+    
+    // 방문 예정 코스 조회
+    
+    // 코스 리뷰 조회
+    
+    // 코스 상세 조회
+    
+    // 예정 등록
+    
 }

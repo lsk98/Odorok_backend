@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VisitationScheduleSummary {
+public class VisitationScheduleSummary { // 방문 예정 코스 조회시.
     private LocalDate dueDate;
     private String gilName;
     private String courseName;

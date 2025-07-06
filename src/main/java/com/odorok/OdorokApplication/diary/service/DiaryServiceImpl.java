@@ -2,12 +2,10 @@ package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
+import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.util.PromptTemplate;
@@ -89,7 +87,9 @@ public class DiaryServiceImpl implements DiaryService{
     public GptService.Prompt buildFinalSystemPrompt(long userId, String style, Long visitedCoursesId) {
         // 방문한 코스 / 명소 조회
         VisitedCourseAndAttraction visited = visitedCourseRepository.findCourseAndAttractionsByVisitedCourseId(userId, visitedCoursesId);
-
+        if(visited == null) {
+            throw new NotFoundException("유효한 vcourse id가 아닙니다.");
+        }
         // 시스템 프롬프트에 방문 장소, 명소 등 데이터 추가
         String systemPrompt = PromptTemplate.of(rawSystemPrompt)
                 .with("style", style)
@@ -97,7 +97,7 @@ public class DiaryServiceImpl implements DiaryService{
                 .with("courseSummary", visited.getCourseSummary())
                 .with("additionalAttractions", visited.attractionsToString())
                 .build();
-
+        log.debug("!!!_________visited_Attractions: {}", visited.attractionsToString());
         return new GptService.Prompt("system", systemPrompt);
     }
 
@@ -122,5 +122,11 @@ public class DiaryServiceImpl implements DiaryService{
         }
         String newContent = chatLog.get(chatLog.size() - 1).getContent();
         return new DiaryChatResponse(newContent, chatLog);
+    }
+
+    @Override
+    public VisitedCourseWithoutDiaryResponse findVisitedCourseWithoutDiaryByUserId(long userId) {
+        List<VisitedCourseSummary> result = visitedCourseRepository.findVisitedCourseWithoutDiaryByUserId(userId);
+        return new VisitedCourseWithoutDiaryResponse(result);
     }
 }

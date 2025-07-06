@@ -38,6 +38,9 @@ public class VisitedCourse {
     @Column(name = "stars")
     private Integer stars;
 
+    @Column(name = "distance")
+    private Double distance;
+
     @Column(name = "review")
     private String review;
 

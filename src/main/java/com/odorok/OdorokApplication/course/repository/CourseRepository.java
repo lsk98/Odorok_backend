@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
     Page<Course> findBySidoCodeAndSigunguCode(Integer sidoCode, Integer sigunguCode, Pageable pageable);
+
 }

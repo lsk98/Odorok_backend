@@ -1,13 +1,11 @@
 package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
+import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
@@ -39,6 +37,9 @@ public class DiaryServiceImplTest {
 
     @Mock
     private InventoryRepository inventoryRepository;
+
+    @Mock
+    private VisitedCourseRepository visitedCourseRepository;
 
     @InjectMocks
     private DiaryServiceImpl diaryService;
@@ -182,6 +183,23 @@ public class DiaryServiceImplTest {
         assertEquals("생성권 아이템 수량이 부족합니다.", ex.getMessage());
     }
 
+    @Test
+    void 방문_완료_및_일지_생성_이전인_방문코스_목록_조회_성공() {
+        long userId = 1L;
+        List<VisitedCourseSummary> mockList = List.of(
+                new VisitedCourseSummary(1L, LocalDateTime.of(2024, 1, 1, 10, 0), "Course A"),
+                new VisitedCourseSummary(2L, LocalDateTime.of(2024, 2, 1, 10, 0), "Course B")
+        );
+        when(visitedCourseRepository.findVisitedCourseWithoutDiaryByUserId(userId))
+                .thenReturn(mockList);
+
+        VisitedCourseWithoutDiaryResponse response = diaryService.findVisitedCourseWithoutDiaryByUserId(userId);
+
+        assertNotNull(response);
+        assertEquals(2, response.getResponse().size());
+        assertEquals("Course A", response.getResponse().get(0).getCourseName());
+
+    }
 
     @Nested
     class InsertGenerationTests {

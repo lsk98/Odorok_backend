@@ -36,6 +36,7 @@ class CourseQueryServiceImplTest {
 
     private static Long TEST_USER_ID = 1L;
 
+
     @Test
     public void 시군구_코드로_코스_조회에_성공한다() {
         // given : Method stub

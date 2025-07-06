@@ -21,6 +21,8 @@ public class QVisitedCourse extends EntityPathBase<VisitedCourse> {
 
     public final NumberPath<Long> courseId = createNumber("courseId", Long.class);
 
+    public final NumberPath<Double> distance = createNumber("distance", Double.class);
+
     public final NumberPath<Long> endCoordsId = createNumber("endCoordsId", Long.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);

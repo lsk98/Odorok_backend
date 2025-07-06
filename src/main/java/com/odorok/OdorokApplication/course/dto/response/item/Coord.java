@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Coord {
+    private Double id;
     private Double latitude;
     private Double longitude;
     private Integer ordering;

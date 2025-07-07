@@ -17,6 +17,6 @@ public class PathCoordQueryServiceImpl implements PathCoordQueryService{
 
     @Override
     public List<Coord> queryCoursePathCoords(Long courseId) {
-        return pathCoordRepository.findByCourseId(courseId);
+        return pathCoordRepository.findByCourseId(courseId).stream().map(Coord::new).toList();
     }
 }

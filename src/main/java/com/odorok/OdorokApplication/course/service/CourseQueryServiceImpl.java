@@ -47,6 +47,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
                 ()->new IllegalArgumentException("존재하지 않는 '명소' 식별자 : " + courseId)));
         detail.setAvgStars(visitedCourseQueryService.queryAverageStars(courseId));
         detail.setReviewCount(visitedCourseQueryService.queryReviewCount(courseId));
+        detail.setCoords(pathCoordQueryService.queryCoursePathCoords(courseId));
         return detail;
     }
 

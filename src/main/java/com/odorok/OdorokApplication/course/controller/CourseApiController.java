@@ -69,8 +69,8 @@ public class CourseApiController {
     public ResponseEntity<ResponseRoot<CourseDetail>> getCourseDetail(
             @RequestParam("courseId") Long courseId) {
         log.debug("코스 상세 조회 요청 : courseId={}", courseId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(CommonResponseBuilder.success("", null));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(CommonResponseBuilder.success("", courseQueryService.queryCourseDetail(courseId)));
     }
 
     // 별점 Top 코스 리스트

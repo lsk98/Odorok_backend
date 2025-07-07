@@ -69,8 +69,14 @@ public class CourseApiController {
     public ResponseEntity<ResponseRoot<CourseDetail>> getCourseDetail(
             @RequestParam("courseId") Long courseId) {
         log.debug("코스 상세 조회 요청 : courseId={}", courseId);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(CommonResponseBuilder.success("", courseQueryService.queryCourseDetail(courseId)));
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(CommonResponseBuilder.success("", courseQueryService.queryCourseDetail(courseId)));
+        } catch (IllegalArgumentException e) {
+            log.debug(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(CommonResponseBuilder.fail("존재하지 않는 코스 아이디("+courseId+") 입니다."));
+        }
     }
 
     // 별점 Top 코스 리스트

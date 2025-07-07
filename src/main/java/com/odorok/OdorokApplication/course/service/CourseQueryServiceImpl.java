@@ -44,7 +44,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     @Override
     public CourseDetail queryCourseDetail(Long courseId) {
         CourseDetail detail = new CourseDetail(courseRepository.findById(courseId).orElseThrow(
-                ()->new IllegalArgumentException("존재하지 않는 '명소' 식별자 : " + courseId)));
+                ()->new IllegalArgumentException("존재하지 않는 '코스' 식별자 : " + courseId)));
         detail.setAvgStars(visitedCourseQueryService.queryAverageStars(courseId));
         detail.setReviewCount(visitedCourseQueryService.queryReviewCount(courseId));
         detail.setCoords(pathCoordQueryService.queryCoursePathCoords(courseId));

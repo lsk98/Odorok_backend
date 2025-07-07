@@ -11,13 +11,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +49,7 @@ class CourseQueryServiceImplTest {
         Mockito.when(visitedCourseQueryService.checkVisitedCourse(Mockito.eq(TEST_USER_ID), Mockito.anyLong())).thenReturn(Boolean.FALSE);
 
         // when
-        List<CourseSummary> res = courseQueryService.findCoursesByRegion(sidoCode, sigunguCode, TEST_USER_ID, Pageable.ofSize(10));
+        List<CourseSummary> res = courseQueryService.queryCoursesByRegion(sidoCode, sigunguCode, TEST_USER_ID, Pageable.ofSize(10));
 
         // then
         assertNotNull(res);
@@ -60,5 +58,19 @@ class CourseQueryServiceImplTest {
         Mockito.verify(routeQueryService, Mockito.times(2)).queryRouteNameByRouteIdx(Mockito.anyString());
         Mockito.verify(visitedCourseQueryService, Mockito.times(2)).checkVisitedCourse(Mockito.eq(TEST_USER_ID), Mockito.anyLong());
 
+    }
+
+    @Test
+    public void 전체_코스_조회에_성공한다() {
+        Pageable pageable = Pageable.ofSize(10);
+        Mockito.when(courseRepository.findAll(pageable)).thenReturn(mockPage);
+        Mockito.when(mockPage.getContent()).thenReturn(List.of(Course.builder().id(1l).name("코스1").routeIdx("GIL001").createdAt(LocalDateTime.now()).modifiedAt(LocalDateTime.now()).build(),
+                Course.builder().id(2l).name("코스2").routeIdx("GIL002").createdAt(LocalDateTime.now()).modifiedAt(LocalDateTime.now()).build()));
+
+        List<CourseSummary> summaries = courseQueryService.queryAllCourses(TEST_USER_ID, pageable);
+
+        assertThat(summaries).isNotNull();
+        assertThat(summaries.size()).isEqualTo(2);
+        Mockito.verify(courseRepository, Mockito.times(1)).findAll(pageable);
     }
 }

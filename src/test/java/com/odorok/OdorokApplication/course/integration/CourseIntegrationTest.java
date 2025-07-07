@@ -27,12 +27,27 @@ public class CourseIntegrationTest {
 
     @LocalServerPort
     private int port;
+    private final String COMMON_URL = "http://localhost";
+    private final String COMMON_PATH = "/api/courses";
+
 
     @Test
     public void 지역별_코스_조회에_성공한다() {
-        String url = UriComponentsBuilder.fromUriString("http://localhost").port(port).path("/api/courses/region")
+        String url = UriComponentsBuilder.fromUriString(COMMON_URL).port(port).path(COMMON_PATH+"/region")
                 .queryParam("sidoCode", "38")
                 .queryParam("sigunguCode", "2")
+                .queryParam("size", "10")
+                .queryParam("page", "0").build().toUri().toString();
+
+        log.debug("요청 url  = {}", url);
+        ResponseRoot response = restTemplate.getForObject(url, ResponseRoot.class);
+        List<CourseSummary> items = (List<CourseSummary>)((LinkedHashMap)response.getData()).get("items");
+        assertThat(items.size()).isEqualTo(10);
+    }
+
+    @Test
+    public void 전체_코스_조회에_성공한다() {
+        String url = UriComponentsBuilder.fromUriString(COMMON_URL).port(port).path(COMMON_PATH)
                 .queryParam("size", "10")
                 .queryParam("page", "0").build().toUri().toString();
 

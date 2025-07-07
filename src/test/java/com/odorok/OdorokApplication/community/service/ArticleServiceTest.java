@@ -79,7 +79,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    void 게시글_작성_실패(){
+    void 게시글_작성_실패() {
         //given
         List<String> urls = List.of("xxx.com","yyy.com");
         Article article = Article.builder().userId(1L).build();

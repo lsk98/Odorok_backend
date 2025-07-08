@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class PathCoordRepositoryTest {
     @Autowired
     private PathCoordRepository pathCoordRepository;
-    private final Long COURSE_ID = 1L;
+    private static final Long COURSE_ID = 1L;
 
     @Test
     public void 코스_좌표_조회에_성공한다() {
-        List<PathCoord> coords = pathCoordRepository.findAll();
+        List<PathCoord> coords = pathCoordRepository.findByCourseId(COURSE_ID);
         System.out.println(coords);
         assertThat(coords.size()).isNotZero();
     }

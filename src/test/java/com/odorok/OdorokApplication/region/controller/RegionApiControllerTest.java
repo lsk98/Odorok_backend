@@ -3,20 +3,14 @@ package com.odorok.OdorokApplication.region.controller;
 import com.odorok.OdorokApplication.region.dto.response.item.SidoSummary;
 import com.odorok.OdorokApplication.region.dto.response.item.SigunguSummary;
 import com.odorok.OdorokApplication.region.service.RegionQueryService;
-import com.odorok.OdorokApplication.security.jwt.filter.JWTAuthenticationFilter;
-import com.odorok.OdorokApplication.security.jwt.filter.JWTVerificationFilter;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -24,7 +18,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(controllers = {RegionApiController.class})
@@ -38,10 +31,10 @@ class RegionApiControllerTest {
 
     private final int SEOUL_SIDO_CODE = 1;
 
-    @MockitoBean
-    private JWTAuthenticationFilter jwtAuthenticationFilter;
-    @MockitoBean
-    private JWTVerificationFilter jwtVerificationFilter;
+//    @MockitoBean
+//    private JWTAuthenticationFilter jwtAuthenticationFilter;
+//    @MockitoBean
+//    private JWTVerificationFilter jwtVerificationFilter;
 
     @MockitoBean
     private RegionQueryService regionQueryService;

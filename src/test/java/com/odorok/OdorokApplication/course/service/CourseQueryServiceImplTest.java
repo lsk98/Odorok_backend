@@ -1,8 +1,10 @@
 package com.odorok.OdorokApplication.course.service;
 
+import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.course.dto.response.item.Coord;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.repository.CourseRepository;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import com.odorok.OdorokApplication.infrastructures.domain.PathCoord;
@@ -97,5 +99,26 @@ class CourseQueryServiceImplTest {
         assertThat(detail.getAvgStars()).isEqualTo(6);
         assertThat(detail.getReviewCount()).isEqualTo(1000);
         assertThat(detail.getCoords().size()).isEqualTo(3);
+    }
+
+    @Test
+    public void 최고_별점_코스_조회에_성공한다() {
+        Mockito.when(visitedCourseQueryService.queryCourseStatistics()).thenReturn(List.of(
+                new CourseStat(1L, 1.4, 10L),
+                new CourseStat(2L, 3.7, 20L),
+                new CourseStat(3L, 6.6, 80L),
+                new CourseStat(4L, 2.4, 50L),
+                new CourseStat(5L, 8.8, 30L),
+                new CourseStat(6L, 7.1, 60L)
+        ));
+
+        Mockito.when(courseRepository.findById(Mockito.anyLong())).thenReturn(
+                Optional.of(new Course())
+        );
+
+        List<RecommendedCourseSummary> summaries = courseQueryService.queryTopStarsCourses(CourseQueryService.RecommendationCriteria.STARS);
+
+        System.out.println(summaries);
+        assertThat(summaries.size()).isEqualTo(5);
     }
 }

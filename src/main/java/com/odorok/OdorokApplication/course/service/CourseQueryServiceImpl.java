@@ -1,7 +1,9 @@
 package com.odorok.OdorokApplication.course.service;
 
+import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.repository.CourseRepository;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,7 +21,6 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     private final RouteQueryService routeQueryService;
     private final VisitedCourseQueryService visitedCourseQueryService;
     private final PathCoordQueryService pathCoordQueryService;
-
 
     @Override
     public List<CourseSummary> queryCoursesByRegion(Integer sidoCode, Integer sigunguCode, Long userId, Pageable pageable) {
@@ -52,4 +54,20 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         return detail;
     }
 
+    @Override
+    public List<RecommendedCourseSummary> queryTopStarsCourses(RecommendationCriteria criteria) {
+        // 별점 내림차순으로 코스를 정렬한다.
+        List<CourseStat> stats = new ArrayList<>(visitedCourseQueryService.queryCourseStatistics());
+        stats.sort(criteria.comparator());
+
+        // 상위 5개 코스 정보를 요약한다.
+        List<RecommendedCourseSummary> result = new ArrayList<>();
+        for(int i = 0; i < Integer.min(5, stats.size()); i++) {
+            result.add(new RecommendedCourseSummary(courseRepository.findById(stats.get(i).getCourseId()).orElseThrow(
+                    () -> new IllegalArgumentException("top stars 에러. 해당 코스 아이디가 존재하지 않습니다.")
+            ), (int)Math.round(stats.get(i).getAvgStars()), stats.get(i).getReviewCount().intValue()));
+        }
+
+        return result;
+    }
 }

@@ -125,7 +125,7 @@ public class DiaryServiceImpl implements DiaryService{
         List<GptService.Prompt> chatLog = gptService.sendPrompt(request.getChatLog(), newPrompt);
         if (chatLog.isEmpty()) {
             log.warn("GPT 응답이 비어 있음. chatLog: {}\nprompt: {}", chatLog, newPrompt);
-            throw new RuntimeException("GPT 응답이 비어있음 ");
+            throw new GptCommunicationException("GPT 응답이 비어있음 ");
         }
         String newContent = chatLog.get(chatLog.size() - 1).getContent();
         return new DiaryChatResponse(newContent, chatLog);
@@ -141,7 +141,7 @@ public class DiaryServiceImpl implements DiaryService{
     public DiaryChatResponse insertRegeneration(long userId, DiaryRegenerationRequest request) {
         // answer로 프롬프트 생성
         String feedback = request.getFeedback();
-        if(feedback != null) {
+        if(feedback == null) {
             // 피드백이 없는 경우 들어갈 기본 피드백
             feedback = defaultFeedbackPrompt;
         }
@@ -149,11 +149,11 @@ public class DiaryServiceImpl implements DiaryService{
         List<GptService.Prompt> chatLog = gptService.sendPrompt(request.getChatLog(), newPrompt);
         if (chatLog.isEmpty()) {
             log.warn("GPT 응답이 비어 있음. chatLog: {}\nprompt: {}", chatLog, newPrompt);
-            throw new RuntimeException("GPT 응답이 비어있음 ");
+            throw new GptCommunicationException("GPT 응답이 비어있음 ");
         }
         String newContent = chatLog.get(chatLog.size() - 1).getContent();
         if(!newContent.endsWith("<END>")) {
-            throw new RuntimeException("GPT 응답에 <END> 토큰이 누락");
+            throw new GptCommunicationException("GPT 응답에 <END> 토큰이 누락");
         }
         return new DiaryChatResponse(newContent, chatLog);
     }

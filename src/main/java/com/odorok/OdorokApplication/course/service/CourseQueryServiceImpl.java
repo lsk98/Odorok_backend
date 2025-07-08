@@ -36,6 +36,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     public List<CourseSummary> summarizeCourseCollection(Long userId, List<Course> courses) {
         return courses.stream().map(course -> {
             CourseSummary summary = new CourseSummary(course); // 방문 했는지를 표시해야하는데, userId가 null인 경우에는 이 작업 스킵.
+            summary.setGilName(routeQueryService.queryRouteNameByRouteIdx(course.getRouteIdx()));
             if(userId != null) summary.setVisited(visitedCourseQueryService.checkVisitedCourse(userId, course.getId()));
             return summary;
         }).toList();

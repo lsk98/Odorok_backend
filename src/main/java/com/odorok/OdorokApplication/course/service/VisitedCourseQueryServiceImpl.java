@@ -17,7 +17,9 @@ public class VisitedCourseQueryServiceImpl implements VisitedCourseQueryService{
 
     @Override
     public Integer queryAverageStars(Long courseId) {
-        return visitedCourseRepository.findAvgStarsByCourseId(courseId).intValue();
+        Double res = visitedCourseRepository.findAvgStarsByCourseId(courseId);
+        if(res != null) return res.intValue();
+        else return 0;
     }
 
     @Override

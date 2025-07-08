@@ -1,5 +1,7 @@
 package com.odorok.OdorokApplication.course.controller;
 
+import com.odorok.OdorokApplication.course.dto.response.item.Coord;
+import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import com.odorok.OdorokApplication.security.config.APISecurityConfig;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.ContentResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,8 +50,9 @@ class CourseApiControllerTest {
     @MockitoBean
     private UserService userService;
 
-    private final Long TEST_USER_ID = 1L;
-    private final String TEST_USER_EMAIL = "email";
+    private final static Long TEST_USER_ID = 1L;
+    private final static String TEST_USER_EMAIL = "email";
+    private final static Long TEST_COURSE_ID = 1L;
 
 
     @Test
@@ -88,10 +92,26 @@ class CourseApiControllerTest {
                 ));
 
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses?")
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses")
                 .param("size", "10").param("page", "0").param("email", TEST_USER_EMAIL));
 
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.items[0].courseId").value(1L));
+    }
+
+    @Test
+    public void 코스_상세_조회에_성공한다() throws Exception {
+        Mockito.when(courseQueryService.queryCourseDetail(TEST_COURSE_ID))
+                .thenReturn(new CourseDetail("요약", "전체", "여행", 6, 1000L, List.of(new Coord())));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/detail")
+                .param("courseId", "1"));
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.summary").value("요약"));
+        resultActions.andExpect(jsonPath("$.data.contents").value("전체"));
+        resultActions.andExpect(jsonPath("$.data.avgStars").value(6));
+        resultActions.andExpect(jsonPath("$.data.reviewCount").value(1000));
+        resultActions.andExpect(jsonPath("$.data.coords").isNotEmpty());
     }
 }

@@ -1,7 +1,7 @@
 package com.odorok.OdorokApplication.s3.service;
 
 import com.odorok.OdorokApplication.s3.dto.S3UploadResult;
-import com.odorok.OdorokApplication.s3.exception.FileUploadException;
+import com.odorok.OdorokApplication.commons.exception.FileUploadException;
 import com.odorok.OdorokApplication.s3.util.S3Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

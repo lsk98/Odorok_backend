@@ -11,7 +11,5 @@ public class ArticleRegistRequest {
     private Integer boardType;
     private Boolean notice;
     private Long diseaseId;
-
     private Long courseId;
-
 }

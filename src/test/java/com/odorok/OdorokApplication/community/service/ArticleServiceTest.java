@@ -5,6 +5,7 @@ import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
 import com.odorok.OdorokApplication.draftDomain.Article;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import javax.swing.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -94,5 +96,23 @@ class ArticleServiceTest {
                 articleService.insertArticle(new ArticleRegistRequest(), images, 1L));
         //트랜잭션 도중 예외가 발생했을 때 catch문이 정상적으로 실행되는지 확인
         verify(articleImageService,times(1)).deleteImages(urls);
+    }
+
+    @Test
+    void 게시글_조회_성공(){
+        //given
+        Article article = Article.builder().userId(1L).content("gg").id(15L).build();
+        //when
+        when(articleRepository.findById(15L)).thenReturn(Optional.ofNullable(article));
+        //then
+        assertEquals(article,articleService.findByArticleId(15L));
+    }
+
+    @Test
+    void 게시글_조회_실패(){
+        //when
+        when(articleRepository.findById(14L)).thenReturn(Optional.empty());
+        //then
+        assertThrows(EntityNotFoundException.class, ()-> articleService.findByArticleId(14L));
     }
 }

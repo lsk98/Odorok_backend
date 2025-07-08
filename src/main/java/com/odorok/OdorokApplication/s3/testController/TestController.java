@@ -1,7 +1,6 @@
 package com.odorok.OdorokApplication.s3.testController;
 
 import com.odorok.OdorokApplication.s3.dto.S3UploadResult;
-import com.odorok.OdorokApplication.s3.exception.UnauthorizedException;
 import com.odorok.OdorokApplication.s3.util.S3Util;
 import com.odorok.OdorokApplication.s3.service.S3ServiceImpl;
 import com.odorok.OdorokApplication.s3.validator.S3Validator;
@@ -26,9 +25,6 @@ public class TestController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteImage(@RequestParam String userId,@RequestParam String url) {
-        if(!S3Validator.isOwner(url,userId)){
-            throw new UnauthorizedException("삭제 권한 없음");
-        }
         String key = S3Util.extractKeyFromUrl(url);
         s3Service.delete(key);
         return ResponseEntity.noContent().build();

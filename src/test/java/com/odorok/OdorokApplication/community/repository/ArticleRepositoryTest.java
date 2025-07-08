@@ -65,4 +65,26 @@ class ArticleRepositoryTest {
         }
         assertEquals(expected,result);
     }
+
+    @Test
+    void 검색_기능_정상작동(){
+        //given
+        ArticleSearchCondition cond = new ArticleSearchCondition();
+        //여정경험담 <-1이라고 가정
+        cond.setCategory(1);
+        //좋아요 순으로 정렬
+        cond.setSort("likeCount");
+        //1페이지 확인
+        cond.setPageNum(1);
+        //검색할 문자
+        cond.setTitle("열 번");
+        //예상값
+        List<String> expected = new ArrayList<>(List.of("열 번째 게시글"));
+        List<ArticleSummary> articles = articleRepository.findByCondition(cond);
+        List<String> result = new ArrayList<>();
+        for(ArticleSummary as : articles){
+            result.add(as.getTitle());
+        }
+        assertEquals(expected,result);
+    }
 }

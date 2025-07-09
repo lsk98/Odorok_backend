@@ -104,21 +104,40 @@ class CourseQueryServiceImplTest {
     @Test
     public void 최고_별점_코스_조회에_성공한다() {
         Mockito.when(visitedCourseQueryService.queryCourseStatistics()).thenReturn(List.of(
-                new CourseStat(1L, 1.4, 10L),
-                new CourseStat(2L, 3.7, 20L),
-                new CourseStat(3L, 6.6, 80L),
-                new CourseStat(4L, 2.4, 50L),
-                new CourseStat(5L, 8.8, 30L),
-                new CourseStat(6L, 7.1, 60L)
+                new CourseStat(1L, 1.4, 10L, 50L),
+                new CourseStat(2L, 3.7, 20L, 21L),
+                new CourseStat(3L, 6.6, 80L, 80L),
+                new CourseStat(4L, 2.4, 50L, 100L),
+                new CourseStat(5L, 8.8, 30L, 31L),
+                new CourseStat(6L, 7.1, 60L, 64L)
         ));
 
         Mockito.when(courseRepository.findById(Mockito.anyLong())).thenReturn(
                 Optional.of(new Course())
         );
 
-        List<RecommendedCourseSummary> summaries = courseQueryService.queryTopStarsCourses(CourseQueryService.RecommendationCriteria.STARS);
+        List<RecommendedCourseSummary> summaries = courseQueryService.queryTopRatedCourses(CourseQueryService.RecommendationCriteria.STARS);
 
         System.out.println(summaries);
         assertThat(summaries.size()).isEqualTo(5);
+    }
+
+    @Test
+    public void 최고_별점_코스_조회에_성공한다_5개_미만() {
+        Mockito.when(visitedCourseQueryService.queryCourseStatistics()).thenReturn(List.of(
+                new CourseStat(1L, 1.4, 10L, 100L),
+                new CourseStat(2L, 3.7, 20L, 21L),
+                new CourseStat(5L, 8.8, 30L, 35L),
+                new CourseStat(6L, 7.1, 60L, 60L)
+        ));
+
+        Mockito.when(courseRepository.findById(Mockito.anyLong())).thenReturn(
+                Optional.of(new Course())
+        );
+
+        List<RecommendedCourseSummary> summaries = courseQueryService.queryTopRatedCourses(CourseQueryService.RecommendationCriteria.STARS);
+
+        System.out.println(summaries);
+        assertThat(summaries.size()).isEqualTo(4);
     }
 }

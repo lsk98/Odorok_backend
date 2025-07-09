@@ -29,7 +29,7 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
-    public final NumberPath<Integer> diseaseId = createNumber("diseaseId", Long.class);
+    public final NumberPath<Integer> diseaseId = createNumber("diseaseId", Integer.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

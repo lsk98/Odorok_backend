@@ -4,7 +4,6 @@ import com.odorok.OdorokApplication.commons.querydsl.config.QueryDslConfig;
 import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

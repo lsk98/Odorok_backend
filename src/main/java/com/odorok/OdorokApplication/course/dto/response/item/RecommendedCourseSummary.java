@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 public class RecommendedCourseSummary extends CourseSummary{
     private Integer avgStars;
     private Integer reviewCount;
-
-    public RecommendedCourseSummary(Course course, Integer avgStars, Integer reviewCount) {
+    private Long visitationCount;
+    public RecommendedCourseSummary(Course course, Integer avgStars, Integer reviewCount, Long visitationCount) {
         super(course);
         this.avgStars = avgStars;
         this.reviewCount = reviewCount;
+        this.visitationCount = visitationCount;
     }
 }

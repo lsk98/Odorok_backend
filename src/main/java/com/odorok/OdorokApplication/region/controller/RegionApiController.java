@@ -26,7 +26,6 @@ public class RegionApiController {
     public ResponseEntity<ResponseRoot<SidoResponse>> getAllSidos() {
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
                 .body(CommonResponseBuilder.success("시도 조회 성공", new SidoResponse(regionQueryService.queryAllSidos())));
-
     }
 
     @GetMapping("/sigungu")

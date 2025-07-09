@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ArticleRegistRequest {
+public class ArticleUpdateRequest {
     private String title;
     private String content;
     private Integer boardType;

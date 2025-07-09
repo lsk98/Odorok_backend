@@ -22,16 +22,15 @@ public class ArticleImageServiceImpl implements ArticleImageService{
         return s3Service.uploadMany("community", String.valueOf(userId),images);
     }
 
+    //articleId를 사용하여 db에서 url을 삭제하는 작업 - 삭제되어야 할 이미지url들을 반환한다.
     @Override
-    public void deleteArticleImages(Long articleId) {
-
+    public List<String> deleteArticleImageUrl(Long articleId) {
+        List<String> urls = articleImageRepository.findImgUrlsByArticleId(articleId);
+        articleImageRepository.deleteByArticleId(articleId);
+        return urls;
     }
 
-    @Override
-    public void deleteArticleImageUrl(Long articleId) {
-
-    }
-
+    //imageurl리스트를 db에 넣는 작업?
     @Override
     public void insertArticleImageUrl(Long userId, List<String> urls) {
         List<ArticleImage> images = new ArrayList();
@@ -41,16 +40,7 @@ public class ArticleImageServiceImpl implements ArticleImageService{
         articleImageRepository.saveAll(images);
     }
 
-    @Override
-    public List<String> findArticleImageUrlById(Long id) {
-        return null;
-    }
-
-    @Override
-    public List<String> updateArticleImageUrl(Long id, List<String> afterUrl) {
-        return null;
-    }
-
+    //수동 롤백 작업용
     @Override
     public void deleteImages(List<String> urls) {
         s3Service.deleteMany(urls);

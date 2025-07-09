@@ -103,7 +103,7 @@ class ArticleServiceTest {
         //given
         Article article = Article.builder().userId(1L).content("gg").id(15L).build();
         //when
-        when(articleRepository.findById(15L)).thenReturn(Optional.ofNullable(article));
+        when(articleRepository.getById(15L)).thenReturn(article);
         //then
         assertEquals(article,articleService.findByArticleId(15L));
     }
@@ -111,7 +111,7 @@ class ArticleServiceTest {
     @Test
     void 게시글_조회_실패(){
         //when
-        when(articleRepository.findById(14L)).thenReturn(Optional.empty());
+        when(articleRepository.getById(14L)).thenThrow(new EntityNotFoundException("게시물이 존재하지 않습니다"));
         //then
         assertThrows(EntityNotFoundException.class, ()-> articleService.findByArticleId(14L));
     }

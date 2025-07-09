@@ -4,29 +4,20 @@ import com.odorok.OdorokApplication.course.dto.response.item.Coord;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
-import com.odorok.OdorokApplication.security.config.APISecurityConfig;
 import com.odorok.OdorokApplication.security.domain.User;
-import com.odorok.OdorokApplication.security.jwt.filter.JWTAuthenticationFilter;
-import com.odorok.OdorokApplication.security.jwt.filter.JWTVerificationFilter;
-import com.odorok.OdorokApplication.security.service.CustomUserDetailsService;
 import com.odorok.OdorokApplication.security.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.ContentResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,10 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = { CourseApiController.class })
 @AutoConfigureMockMvc(addFilters = false)
 class CourseApiControllerTest {
-    @MockitoBean
-    private JWTAuthenticationFilter jwtAuthenticationFilter;
-    @MockitoBean
-    private JWTVerificationFilter jwtVerificationFilter;
+//    @MockitoBean
+//    private JWTAuthenticationFilter jwtAuthenticationFilter;
+//    @MockitoBean
+//    private JWTVerificationFilter jwtVerificationFilter;
 
     @Autowired
     private MockMvc mockMvc;

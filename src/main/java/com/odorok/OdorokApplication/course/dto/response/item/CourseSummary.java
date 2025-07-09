@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -40,8 +41,8 @@ public class CourseSummary {
         this.level = course.getLevel();
         this.cycle = course.getCycle();
         this.brdDiv = course.getBrdDiv();
-        this.createdAt = course.getCreatedAt().toLocalDate();
-        this.modifiedAt = course.getModifiedAt().toLocalDate();
+        this.createdAt = (course.getCreatedAt() != null) ? course.getCreatedAt().toLocalDate() : null;
+        this.modifiedAt = (course.getModifiedAt() != null) ? course.getModifiedAt().toLocalDate() : null;
         this.reward = course.getReward();
     }
 }

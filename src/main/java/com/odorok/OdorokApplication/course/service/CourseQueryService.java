@@ -1,11 +1,13 @@
 package com.odorok.OdorokApplication.course.service;
 
+import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 public interface CourseQueryService {
@@ -13,4 +15,20 @@ public interface CourseQueryService {
     List<CourseSummary> queryAllCourses(Long userId, Pageable pageable);
     List<CourseSummary> summarizeCourseCollection( Long userId, List<Course> courses);
     CourseDetail queryCourseDetail(Long courseId);
+    List<RecommendedCourseSummary> queryTopStarsCourses(RecommendationCriteria criteria);
+
+    enum RecommendationCriteria {
+        STARS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars())),
+        REVIEWS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars()));
+
+        RecommendationCriteria(Comparator<CourseStat> comp) {
+            this.comparator = comp;
+        }
+
+        private Comparator<CourseStat> comparator;
+
+        public Comparator<CourseStat> comparator() {
+            return this.comparator;
+        }
+    }
 }

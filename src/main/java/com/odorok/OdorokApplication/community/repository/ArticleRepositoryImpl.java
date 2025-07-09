@@ -34,8 +34,8 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         titleLike(cond.getTitle())
                 )
                 .orderBy(getSortOrder(cond.getSort()))
-                .offset((long) (cond.getPageNum() - 1) * 10)
-                .limit(10)
+                .offset((long) (cond.getPageNum() - 1) * 50)
+                .limit(50)
                 .fetch();
 
         List<ArticleSummary> result = queryFactory

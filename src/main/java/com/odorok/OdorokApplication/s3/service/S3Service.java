@@ -1,6 +1,5 @@
 package com.odorok.OdorokApplication.s3.service;
 
-import com.odorok.OdorokApplication.s3.dto.S3UploadResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

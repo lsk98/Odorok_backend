@@ -52,7 +52,7 @@ class ArticleServiceTest {
                 0,
                 false,
                 123L,
-                45L,
+                45,
                 "testuser"
         )));
         ArticleSearchCondition cond = new ArticleSearchCondition();

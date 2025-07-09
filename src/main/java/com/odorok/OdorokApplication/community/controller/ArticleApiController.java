@@ -19,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.odorok.OdorokApplication.domain.QUser.user;
+
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
 @RestController
@@ -55,9 +57,10 @@ public class ArticleApiController {
     @PutMapping("/{articles-id}")
     @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
     public ResponseEntity<ResponseRoot<Void>> updateArticle(@RequestPart("data") ArticleUpdateRequest request,
-                                                            @RequestPart("images") List<MultipartFile> images,
+                                                            @RequestPart(name = "images") List<MultipartFile> images,
                                                             @PathVariable("articles-id") Long articleId,
-                                                            @AuthenticationPrincipal CustomUserDetails user) {
+                                                            @AuthenticationPrincipal CustomUserDetails user
+                                                            ) {
         Long userId = user.getUser().getId();
         articleService.updateArticle(request,images,articleId,userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 수정되었습니다."));

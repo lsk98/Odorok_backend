@@ -3,6 +3,8 @@ package com.odorok.OdorokApplication.course.integration;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.LinkedHashMap;
@@ -64,6 +67,27 @@ public class CourseIntegrationTest {
         LinkedHashMap detail = (LinkedHashMap)(response.getData());
 
         assertThat(detail).isNotNull();
+        System.out.println(detail);
+    }
+
+    @Test
+    @Sql("/sql/test-vcourse.sql")
+    @Sql(statements = "delete from visited_courses where review = 'review'", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void TOP_코스_조회에_성공한다() {
+        String url = UriComponentsBuilder.fromUriString(COMMON_URL)
+                .port(port).path(COMMON_PATH+"/top").toUriString();
+
+        ResponseRoot response = restTemplate.getForObject(url, ResponseRoot.class);
+        LinkedHashMap detail = (LinkedHashMap)(response.getData());
+
+        List<RecommendedCourseSummary> topStars = (List< RecommendedCourseSummary>)detail.get("topStars");
+        List<RecommendedCourseSummary> topVisited = (List< RecommendedCourseSummary>)detail.get("topVisited");
+        List<RecommendedCourseSummary> topReviewCount = (List< RecommendedCourseSummary>)detail.get("topReviewCount");
+
+        assertThat(detail).isNotNull();
+        assertThat(topStars).isNotNull();
+        assertThat(topVisited).isNotNull();
+        assertThat(topReviewCount).isNotNull();
         System.out.println(detail);
     }
 }

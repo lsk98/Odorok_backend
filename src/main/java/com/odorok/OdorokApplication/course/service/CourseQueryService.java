@@ -15,11 +15,12 @@ public interface CourseQueryService {
     List<CourseSummary> queryAllCourses(Long userId, Pageable pageable);
     List<CourseSummary> summarizeCourseCollection( Long userId, List<Course> courses);
     CourseDetail queryCourseDetail(Long courseId);
-    List<RecommendedCourseSummary> queryTopStarsCourses(RecommendationCriteria criteria);
+    List<RecommendedCourseSummary> queryTopRatedCourses(RecommendationCriteria criteria);
 
     enum RecommendationCriteria {
         STARS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars())),
-        REVIEWS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars()));
+        REVIEWS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars())),
+        TOTAL_VISITATION((a, b) -> b.getVisitationCount().compareTo(a.getVisitationCount()));
 
         RecommendationCriteria(Comparator<CourseStat> comp) {
             this.comparator = comp;

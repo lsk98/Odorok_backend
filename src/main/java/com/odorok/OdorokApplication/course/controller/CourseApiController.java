@@ -3,8 +3,10 @@ package com.odorok.OdorokApplication.course.controller;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.course.dto.response.holder.CourseResponse;
+import com.odorok.OdorokApplication.course.dto.response.holder.TopRatedCourseResponse;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import com.odorok.OdorokApplication.security.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,12 +82,22 @@ public class CourseApiController {
         }
     }
 
-    // 별점 Top 코스 리스트
-    
-    // 방문수 Top 코스 리스트
-    
+    // Top 코스 리스트
+    @GetMapping("/top")
+    public ResponseEntity<ResponseRoot<TopRatedCourseResponse>> getTopStarsCourses() {
+        log.debug("상위 코스 조회 요청");
+        // criteria => "stars", "visit", "reviews"
+        TopRatedCourseResponse res = new TopRatedCourseResponse();
+        res.setTopStars(courseQueryService.queryTopRatedCourses(CourseQueryService.RecommendationCriteria.STARS));
+        res.setTopVisited(courseQueryService.queryTopRatedCourses(CourseQueryService.RecommendationCriteria.TOTAL_VISITATION));
+        res.setTopReviewCount(courseQueryService.queryTopRatedCourses(CourseQueryService.RecommendationCriteria.REVIEWS));
+
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                .body(CommonResponseBuilder.success("", res));
+    }
+
     // 사용자 질병 코스 리스트
-    
+    // insert into health_infos values(null, 1, 1, 175, 70, 25, 1, 13, 2, 1);g
     // 사용자 지역 코스 리스트
     
     // 방문 예정 코스 조회

@@ -3,10 +3,13 @@ package com.odorok.OdorokApplication.course.controller;
 import com.odorok.OdorokApplication.course.dto.response.item.Coord;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
+import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import com.odorok.OdorokApplication.security.domain.User;
 import com.odorok.OdorokApplication.security.service.UserService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -104,5 +107,27 @@ class CourseApiControllerTest {
         resultActions.andExpect(jsonPath("$.data.avgStars").value(6));
         resultActions.andExpect(jsonPath("$.data.reviewCount").value(1000));
         resultActions.andExpect(jsonPath("$.data.coords").isNotEmpty());
+    }
+
+    @Test
+    public void 별점_상위_코스_조회에_성공한다() throws Exception {
+        Mockito.when(courseQueryService.queryTopRatedCourses(Mockito.any(CourseQueryService.RecommendationCriteria.class)))
+                .thenReturn(List.of(
+                        new RecommendedCourseSummary(new Course(), 6, 10, 15L),
+                        new RecommendedCourseSummary(new Course(), 7, 15, 20L),
+                        new RecommendedCourseSummary(new Course(), 8, 15, 20L),
+                        new RecommendedCourseSummary(new Course(), 9, 16, 20L),
+                        new RecommendedCourseSummary(new Course(), 10, 20, 20L)
+                ));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/top"));
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.topStars").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.data.topVisited").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.data.topReviewCount").isNotEmpty());
+        resultActions.andDo(MockMvcResultHandlers.print());
+
+        Mockito.verify(courseQueryService, Mockito.times(3)).queryTopRatedCourses(Mockito.any(CourseQueryService.RecommendationCriteria.class));
     }
 }

@@ -13,8 +13,8 @@ public class QCourseStat extends ConstructorExpression<CourseStat> {
 
     private static final long serialVersionUID = -1514450703L;
 
-    public QCourseStat(com.querydsl.core.types.Expression<Long> courseId, com.querydsl.core.types.Expression<Double> avgStars, com.querydsl.core.types.Expression<Long> reviewCount) {
-        super(CourseStat.class, new Class<?>[]{long.class, double.class, long.class}, courseId, avgStars, reviewCount);
+    public QCourseStat(com.querydsl.core.types.Expression<Long> courseId, com.querydsl.core.types.Expression<Double> avgStars, com.querydsl.core.types.Expression<Long> reviewCount, com.querydsl.core.types.Expression<Long> visitationCount) {
+        super(CourseStat.class, new Class<?>[]{long.class, double.class, long.class, long.class}, courseId, avgStars, reviewCount, visitationCount);
     }
 
 }

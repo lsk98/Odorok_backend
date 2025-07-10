@@ -55,7 +55,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     }
 
     @Override
-    public List<RecommendedCourseSummary> queryTopStarsCourses(RecommendationCriteria criteria) {
+    public List<RecommendedCourseSummary> queryTopRatedCourses(RecommendationCriteria criteria) {
         // 별점 내림차순으로 코스를 정렬한다.
         List<CourseStat> stats = new ArrayList<>(visitedCourseQueryService.queryCourseStatistics());
         stats.sort(criteria.comparator());
@@ -65,7 +65,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         for(int i = 0; i < Integer.min(5, stats.size()); i++) {
             result.add(new RecommendedCourseSummary(courseRepository.findById(stats.get(i).getCourseId()).orElseThrow(
                     () -> new IllegalArgumentException("top stars 에러. 해당 코스 아이디가 존재하지 않습니다.")
-            ), (int)Math.round(stats.get(i).getAvgStars()), stats.get(i).getReviewCount().intValue()));
+            ), (int)Math.round(stats.get(i).getAvgStars()), stats.get(i).getReviewCount().intValue(), stats.get(i).getVisitationCount()));
         }
 
         return result;

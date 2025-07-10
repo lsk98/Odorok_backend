@@ -11,11 +11,13 @@ public class CourseStat {
     private Long courseId;
     private Double avgStars;
     private Long reviewCount;
+    private Long visitationCount;
 
     @QueryProjection
-    public CourseStat(Long courseId, Double avgStars, Long reviewCount) {
+    public CourseStat(Long courseId, Double avgStars, Long reviewCount, Long visitationCount) {
         this.courseId = courseId;
         this.avgStars = avgStars;
         this.reviewCount = reviewCount;
+        this.visitationCount = visitationCount;
     }
 }

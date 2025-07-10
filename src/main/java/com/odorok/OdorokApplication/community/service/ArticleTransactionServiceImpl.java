@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.community.service;
 
+import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
 import com.odorok.OdorokApplication.community.repository.PointHistoryRepository;
 import com.odorok.OdorokApplication.community.repository.ProfileRepository;
@@ -36,5 +37,25 @@ public class ArticleTransactionServiceImpl implements ArticleTransactionService{
         //점수 이력 추가
         PointHistory history = PointHistory.builder().articleId(articleId).userId(article.getUserId()).point(30).build();
         pointHistoryRepository.save(history);
+    }
+
+    @Override
+    @Transactional
+    public List<String> updateArticleInfo(ArticleUpdateRequest request, List<String> newUrlList,Long articleId) {
+        //트랜잭션 작업으로 빼자
+        //기존 url db에서 삭제(리턴되어야 함)
+        List<String> list = articleImageService.deleteArticleImageUrl(articleId);
+        //새로운 url db삽입
+        articleImageService.insertArticleImageUrl(articleId,newUrlList);
+        //텍스트 변경
+        Article article = articleRepository.getById(articleId);
+        article.setTitle(request.getTitle());
+        article.setContent(request.getContent());
+        article.setBoardType(request.getBoardType());
+        article.setNotice(request.getNotice());
+        article.setDiseaseId(request.getDiseaseId());
+        article.setCourseId(request.getCourseId());
+        //트랜잭션 종료
+        return list;
     }
 }

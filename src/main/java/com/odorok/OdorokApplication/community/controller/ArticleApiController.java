@@ -5,6 +5,7 @@ import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
+import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.service.ArticleService;
 import com.odorok.OdorokApplication.draftDomain.Article;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static com.odorok.OdorokApplication.domain.QUser.user;
 
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
@@ -32,8 +35,7 @@ public class ArticleApiController {
     @PostMapping("")
     public ResponseEntity<ResponseRoot<Void>> registArticle(@RequestPart("data") ArticleRegistRequest request,
                                                             @RequestPart("images") List<MultipartFile> images,
-                                                            @AuthenticationPrincipal CustomUserDetails user
-    ) {
+                                                            @AuthenticationPrincipal CustomUserDetails user) {
         long userId = user.getUser().getId();
         articleService.insertArticle(request, images, userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 등록되었습니다."));
@@ -47,10 +49,20 @@ public class ArticleApiController {
 
     @DeleteMapping("/{articles-id}")
     @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
-    public ResponseEntity<ResponseRoot<Void>> deleteArticle(@PathVariable("articles-id") Long articleId,
-                                                            @AuthenticationPrincipal CustomUserDetails user) {
-        long userId = user.getUser().getId();
+    public ResponseEntity<ResponseRoot<Void>> deleteArticle(@PathVariable("articles-id") Long articleId) {
         articleService.deleteArticle(articleId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 삭제되었습니다."));
+    }
+
+    @PutMapping("/{articles-id}")
+    @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
+    public ResponseEntity<ResponseRoot<Void>> updateArticle(@RequestPart("data") ArticleUpdateRequest request,
+                                                            @RequestPart(name = "images") List<MultipartFile> images,
+                                                            @PathVariable("articles-id") Long articleId,
+                                                            @AuthenticationPrincipal CustomUserDetails user
+                                                            ) {
+        Long userId = user.getUser().getId();
+        articleService.updateArticle(request,images,articleId,userId);
+        return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 수정되었습니다."));
     }
 }

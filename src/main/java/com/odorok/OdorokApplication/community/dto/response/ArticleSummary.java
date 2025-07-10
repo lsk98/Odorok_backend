@@ -18,14 +18,14 @@ public class ArticleSummary {
     private Integer boardType;
     private Boolean notice;
     private Long vcourseId;
-    private Long diseaseId;
+    private Integer diseaseId;
     private String nickname;
 
     @QueryProjection
     public ArticleSummary(Long id, String title, String content, LocalDateTime createdAt,
                           Integer likeCount, Integer viewCount, Integer commentCount,
                           Integer boardType, Boolean notice,
-                          Long vcourseId, Long diseaseId, String nickname) {
+                          Long vcourseId, Integer diseaseId, String nickname) {
         this.id = id;
         this.title = title;
         this.content = content;

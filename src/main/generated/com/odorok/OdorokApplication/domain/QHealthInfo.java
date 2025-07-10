@@ -21,8 +21,6 @@ public class QHealthInfo extends EntityPathBase<HealthInfo> {
 
     public final NumberPath<Integer> age = createNumber("age", Integer.class);
 
-    public final NumberPath<Long> diseaseMask = createNumber("diseaseMask", Long.class);
-
     public final NumberPath<Integer> drinkPerWeek = createNumber("drinkPerWeek", Integer.class);
 
     public final NumberPath<Integer> exercisePerWeek = createNumber("exercisePerWeek", Integer.class);

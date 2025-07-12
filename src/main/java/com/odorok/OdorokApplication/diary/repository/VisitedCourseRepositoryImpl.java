@@ -1,5 +1,7 @@
 package com.odorok.OdorokApplication.diary.repository;
 
+import com.odorok.OdorokApplication.course.dto.process.CourseStat;
+import com.odorok.OdorokApplication.course.dto.process.QCourseStat;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.response.VisitedCourseSummary;
@@ -87,5 +89,12 @@ public class VisitedCourseRepositoryImpl implements VisitedCourseRepositoryCusto
                 ))
                 .collect(Collectors.toList());
         return result;
+    }
+
+    @Override
+    public List<CourseStat> summarizeCourseFeedback() {
+        return jpaQueryFactory.select(
+                new QCourseStat(visitedCourses.courseId, visitedCourses.stars.avg(), visitedCourses.review.count(), visitedCourses.id.count())
+                ).from(visitedCourses).groupBy(visitedCourses.courseId).fetch();
     }
 }

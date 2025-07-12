@@ -1,28 +1,25 @@
 package com.odorok.OdorokApplication.course.controller;
 
+import com.odorok.OdorokApplication.course.dto.response.item.Coord;
+import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
-import com.odorok.OdorokApplication.security.config.APISecurityConfig;
+import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import com.odorok.OdorokApplication.security.domain.User;
-import com.odorok.OdorokApplication.security.jwt.filter.JWTAuthenticationFilter;
-import com.odorok.OdorokApplication.security.jwt.filter.JWTVerificationFilter;
-import com.odorok.OdorokApplication.security.service.CustomUserDetailsService;
 import com.odorok.OdorokApplication.security.service.UserService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.ContentResultMatchers;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.time.LocalDateTime;
@@ -34,10 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = { CourseApiController.class })
 @AutoConfigureMockMvc(addFilters = false)
 class CourseApiControllerTest {
-    @MockitoBean
-    private JWTAuthenticationFilter jwtAuthenticationFilter;
-    @MockitoBean
-    private JWTVerificationFilter jwtVerificationFilter;
+//    @MockitoBean
+//    private JWTAuthenticationFilter jwtAuthenticationFilter;
+//    @MockitoBean
+//    private JWTVerificationFilter jwtVerificationFilter;
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,8 +44,9 @@ class CourseApiControllerTest {
     @MockitoBean
     private UserService userService;
 
-    private final Long TEST_USER_ID = 1L;
-    private final String TEST_USER_EMAIL = "email";
+    private final static Long TEST_USER_ID = 1L;
+    private final static String TEST_USER_EMAIL = "email";
+    private final static Long TEST_COURSE_ID = 1L;
 
 
     @Test
@@ -88,10 +86,48 @@ class CourseApiControllerTest {
                 ));
 
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses?")
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses")
                 .param("size", "10").param("page", "0").param("email", TEST_USER_EMAIL));
 
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.items[0].courseId").value(1L));
+    }
+
+    @Test
+    public void 코스_상세_조회에_성공한다() throws Exception {
+        Mockito.when(courseQueryService.queryCourseDetail(TEST_COURSE_ID))
+                .thenReturn(new CourseDetail("요약", "전체", "여행", 6, 1000L, List.of(new Coord())));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/detail")
+                .param("courseId", "1"));
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.summary").value("요약"));
+        resultActions.andExpect(jsonPath("$.data.contents").value("전체"));
+        resultActions.andExpect(jsonPath("$.data.avgStars").value(6));
+        resultActions.andExpect(jsonPath("$.data.reviewCount").value(1000));
+        resultActions.andExpect(jsonPath("$.data.coords").isNotEmpty());
+    }
+
+    @Test
+    public void 별점_상위_코스_조회에_성공한다() throws Exception {
+        Mockito.when(courseQueryService.queryTopRatedCourses(Mockito.any(CourseQueryService.RecommendationCriteria.class)))
+                .thenReturn(List.of(
+                        new RecommendedCourseSummary(new Course(), 6, 10, 15L),
+                        new RecommendedCourseSummary(new Course(), 7, 15, 20L),
+                        new RecommendedCourseSummary(new Course(), 8, 15, 20L),
+                        new RecommendedCourseSummary(new Course(), 9, 16, 20L),
+                        new RecommendedCourseSummary(new Course(), 10, 20, 20L)
+                ));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/top"));
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.topStars").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.data.topVisited").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.data.topReviewCount").isNotEmpty());
+        resultActions.andDo(MockMvcResultHandlers.print());
+
+        Mockito.verify(courseQueryService, Mockito.times(3)).queryTopRatedCourses(Mockito.any(CourseQueryService.RecommendationCriteria.class));
     }
 }

@@ -11,13 +11,13 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
-import jakarta.persistence.EntityManager;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
+public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     private final QArticle article = QArticle.article;
@@ -30,11 +30,12 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
                         article.id
                 ).from(article)
                 .where(
-                        categoryEq(cond.getCategory())
+                        categoryEq(cond.getCategory()),
+                        titleLike(cond.getTitle())
                 )
                 .orderBy(getSortOrder(cond.getSort()))
-                .offset((long)(cond.getPageNum()-1)*10)
-                .limit(10)
+                .offset((long) (cond.getPageNum() - 1) * 50)
+                .limit(50)
                 .fetch();
 
         List<ArticleSummary> result = queryFactory
@@ -64,10 +65,16 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     }
 
     @Nullable
-    private BooleanExpression categoryEq(Integer category){
+    private BooleanExpression categoryEq(Integer category) {
         return article.boardType.eq(category);
     }
-    private OrderSpecifier<?> getSortOrder(String sort){
+
+    @Nullable
+    private BooleanExpression titleLike(String title){
+        return StringUtils.hasText(title) ? article.title.like("%"+title+"%") : null;
+    }
+
+    private OrderSpecifier<?> getSortOrder(String sort) {
         return switch (sort) {
             case "createdAt" -> article.createdAt.desc();
             case "likeCount" -> article.likeCount.desc();

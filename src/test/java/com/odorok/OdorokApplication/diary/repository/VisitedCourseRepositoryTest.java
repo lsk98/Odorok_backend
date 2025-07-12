@@ -45,17 +45,17 @@ class VisitedCourseRepositoryTest {
         TARGET_COURSE_ID = dummyCourse.getId();
 
         dummies.add(VisitedCourse.builder()
-                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(15L).startCoordsId(1L).endCoordsId(2L).distance(3.4).stars(1).review("리뷰1").isFinished(false).build());
+                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(1L).startCoordsId(1L).endCoordsId(2L).distance(3.4).stars(1).review("리뷰1").isFinished(false).build());
         dummies.add(VisitedCourse.builder()
-                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(15L).startCoordsId(1L).endCoordsId(2L).distance(9.1).stars(5).isFinished(true).build());
+                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(1L).startCoordsId(1L).endCoordsId(2L).distance(9.1).stars(5).isFinished(true).build());
         dummies.add(VisitedCourse.builder()
-                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(15L).startCoordsId(1L).endCoordsId(2L).distance(12.2).stars(7).review("리뷰3").isFinished(false).build());
+                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(1L).startCoordsId(1L).endCoordsId(2L).distance(12.2).stars(7).review("리뷰3").isFinished(false).build());
         dummies.add(VisitedCourse.builder()
-                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(15L).startCoordsId(1L).endCoordsId(2L).distance(3.1).stars(9).review("리뷰4").isFinished(true).build());
+                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(1L).startCoordsId(1L).endCoordsId(2L).distance(3.1).stars(9).review("리뷰4").isFinished(true).build());
         dummies.add(VisitedCourse.builder()
-                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(15L).startCoordsId(1L).endCoordsId(2L).distance(5.5).stars(10).isFinished(true).build());
+                .courseId(TARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(1L).startCoordsId(1L).endCoordsId(2L).distance(5.5).stars(10).isFinished(true).build());
         dummies.add(VisitedCourse.builder()
-                .courseId(NONTARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(15L).startCoordsId(1L).endCoordsId(2L).distance(5.5).stars(0).review("리뷰6").isFinished(true).build());
+                .courseId(NONTARGET_COURSE_ID).visitedAt(LocalDateTime.now()).userId(1L).startCoordsId(1L).endCoordsId(2L).distance(5.5).stars(0).review("리뷰6").isFinished(true).build());
         visitedCourseRepository.saveAll(dummies);
     }
 

@@ -10,8 +10,6 @@ public class ArticleRegistRequest {
     private String content;
     private Integer boardType;
     private Boolean notice;
-    private Long diseaseId;
-
+    private Integer diseaseId;
     private Long courseId;
-
 }

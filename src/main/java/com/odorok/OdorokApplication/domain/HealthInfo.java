@@ -27,9 +27,6 @@ public class HealthInfo {
 
     private Integer age;
 
-    @Column(name = "disease_mask")
-    private Long diseaseMask;
-
     private Boolean smoking; // TINYINT(1)
 
     @Column(name = "drink_per_week")

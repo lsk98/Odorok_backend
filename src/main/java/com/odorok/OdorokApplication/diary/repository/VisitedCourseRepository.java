@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.diary.repository;
 
+import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.domain.VisitedCourse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

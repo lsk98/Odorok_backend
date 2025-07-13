@@ -3,16 +3,19 @@ package com.odorok.OdorokApplication.community.service;
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
+import com.odorok.OdorokApplication.community.dto.request.CommentRegistRequest;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
+import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
+import com.odorok.OdorokApplication.community.repository.CommentRepository;
+import com.odorok.OdorokApplication.community.repository.LikeRepository;
+import com.odorok.OdorokApplication.domain.Comment;
+import com.odorok.OdorokApplication.domain.Like;
 import com.odorok.OdorokApplication.draftDomain.Article;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -24,6 +27,8 @@ public class ArticleServiceImpl implements ArticleService{
     private final ArticleImageService articleImageService;
     private final ArticleRepository articleRepository;
     private final ArticleTransactionService articleTransactionService;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public void insertArticle(ArticleRegistRequest request, List<MultipartFile> images, Long userId) {
@@ -65,4 +70,25 @@ public class ArticleServiceImpl implements ArticleService{
         articleImageService.deleteImages(oldUrlList);
 
     }
+
+    @Override
+    @Transactional
+    public void updateLike(Long articleId, Long userId) {
+        Like like = Like.builder().articleId(articleId).userId(userId).build();
+        likeRepository.save(like);
+        Article article = articleRepository.getById(articleId);
+        article.setLikeCount(article.getLikeCount()+1);
+    }
+
+    @Override
+    public List<CommentSummary> findCommentsByArticleId(Long articleId) {
+        return commentRepository.findCommentsByArticleId(articleId);
+    }
+
+    @Override
+    public void registComment(Long articleId, CommentRegistRequest request, Long userId) {
+        Comment comment = Comment.builder().articleId(articleId).content(request.getContent()).userId(userId).build();
+        commentRepository.save(comment);
+    }
+
 }

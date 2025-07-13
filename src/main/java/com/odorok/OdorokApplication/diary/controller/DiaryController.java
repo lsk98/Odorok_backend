@@ -12,6 +12,7 @@ import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckRespo
 import com.odorok.OdorokApplication.diary.dto.response.VisitedCourseWithoutDiaryResponse;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
 import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -105,7 +106,7 @@ public class DiaryController {
 
     @PostMapping(consumes = "MediaType.MULTIPART_FORM_DATA_VALUE")
     public ResponseEntity<?> registFinalizeDiary(
-            @RequestPart("diary") DiaryRequest diaryRequest,
+            @RequestPart("diary") @Valid DiaryRequest diaryRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CustomUserDetails user) {
         //        long userId = user.getUser().getId();

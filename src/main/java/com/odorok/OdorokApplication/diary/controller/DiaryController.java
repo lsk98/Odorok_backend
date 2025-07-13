@@ -5,6 +5,7 @@ import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
@@ -17,8 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.odorok.OdorokApplication.commons.response.CommonResponseBuilder.*;
 
@@ -96,7 +99,19 @@ public class DiaryController {
 //        long userId = user.getUser().getId();
         long userId = 1L; // 테스트용
         VisitedCourseWithoutDiaryResponse response = diaryService.findVisitedCourseWithoutDiaryByUserId(userId);
+
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping(consumes = "MediaType.MULTIPART_FORM_DATA_VALUE")
+    public ResponseEntity<?> registFinalizeDiary(
+            @RequestPart("diary") DiaryRequest diaryRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        //        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
+        Long savedDiaryId = diaryService.insertFinalizeDiary(userId, diaryRequest, images);
+        ResponseRoot<Map> response = successDone("일지 생성 성공", Map.of("diaryId", savedDiaryId));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

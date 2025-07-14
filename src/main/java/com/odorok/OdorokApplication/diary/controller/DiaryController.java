@@ -104,7 +104,7 @@ public class DiaryController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping(consumes = "MediaType.MULTIPART_FORM_DATA_VALUE")
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<?> registFinalizeDiary(
             @RequestPart("diary") @Valid DiaryRequest diaryRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,

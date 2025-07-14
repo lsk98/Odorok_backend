@@ -1,14 +1,19 @@
 package com.odorok.OdorokApplication.course.service;
 
+import com.odorok.OdorokApplication.course.domain.DiseaseCourseStat;
 import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.DiseaseAndCourses;
 import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.repository.CourseRepository;
+import com.odorok.OdorokApplication.course.repository.UserDiseaseRepository;
+import com.odorok.OdorokApplication.domain.UserDisease;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,6 +26,8 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     private final RouteQueryService routeQueryService;
     private final VisitedCourseQueryService visitedCourseQueryService;
     private final PathCoordQueryService pathCoordQueryService;
+    private final DiseaseCourseStatQueryService diseaseCourseStatQueryService;
+    private final UserDiseaseQueryService userDiseaseQueryService;
 
     @Override
     public List<CourseSummary> queryCoursesByRegion(Integer sidoCode, Integer sigunguCode, Long userId, Pageable pageable) {
@@ -70,4 +77,42 @@ public class CourseQueryServiceImpl implements CourseQueryService{
 
         return result;
     }
+
+    @Override
+    public List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria) {
+        List<DiseaseAndCourses> result = new ArrayList<>();
+
+        List<UserDisease> diseases = userDiseaseQueryService.queryUserDiseases(userId);
+        for(UserDisease disease : diseases) {
+            result.add(this.queryCoursesForDisease(disease.getDiseaseId(), criteria));
+        }
+
+        return result;
+    }
+
+    @Override
+    public DiseaseAndCourses queryCoursesForDisease(Long diseaseId, RecommendationCriteria criteria) {
+        List<DiseaseCourseStat> stats = diseaseCourseStatQueryService.queryDiseaseCourseStatFor(diseaseId);
+        if(stats.isEmpty()) return null;
+
+        stats.sort(criteria.comparator());
+
+        DiseaseAndCourses result = new DiseaseAndCourses();
+        result.setDiseaseCode(diseaseId);
+
+        List<RecommendedCourseSummary> courses = new ArrayList<>();
+        for(int i = 0; i < Math.min(5, stats.size()); i++) {
+            courses.add(new RecommendedCourseSummary(
+                    courseRepository.findById(stats.get(i).getCourseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코스 아이디로 조회를 시도했습니다.")),
+                    (int)Math.round(stats.get(i).getAvgStars()),
+                    stats.get(i).getReviewCount().intValue(),
+                    stats.get(i).getVisitationCount()
+                    )
+            );
+        }
+
+        result.setCourses(courses);
+        return result;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.odorok.OdorokApplication.diary.service;
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
@@ -10,17 +11,20 @@ import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.domain.Diary;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.gpt.service.GptService;
 import com.odorok.OdorokApplication.diary.repository.InventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.junit.jupiter.api.Nested;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDateTime;
@@ -465,6 +469,59 @@ public class DiaryServiceImplTest {
                     diaryService.insertRegeneration(userId, new DiaryRegenerationRequest(feedback, chatLog)));
 
             assertEquals("GPT 응답이 비어있음 ", ex.getMessage());
+        }
+    }
+
+    @Nested
+    class InsergFinalizeTest {
+        @Mock
+        private DiaryImageService diaryImageService;
+
+        @Mock
+        private DiaryRepository diaryRepository;
+
+        @InjectMocks
+        private DiaryServiceImpl diaryService;
+
+        @Test
+        void 최종_일지_저장_성공() {
+            long userId = 1L;
+            DiaryRequest diaryRequest = new DiaryRequest(1L, "일지 제목", "일지 내용");
+            List<MultipartFile> images = List.of(mock(MultipartFile.class));
+            List<String> imgUrls = List.of("https://s3/image1.jpg", "https://s3/image2.jpg");
+
+            Diary savedDiary = Diary.builder()
+                    .id(100L)
+                    .title(diaryRequest.getTitle())
+                    .content(diaryRequest.getContent())
+                    .userId(userId)
+                    .vcourseId(diaryRequest.getVcourseId())
+                    .build();
+
+            when(diaryImageService.insertDiaryImage(images, userId)).thenReturn(imgUrls);
+            when(diaryRepository.save(any(Diary.class))).thenReturn(savedDiary);
+
+            Long savedId = diaryService.insertFinalizeDiary(userId, diaryRequest, images);
+            assertEquals(savedDiary.getId(), savedId);
+            verify(diaryImageService).insertDiaryImage(images, userId);
+            verify(diaryRepository).save(any(Diary.class));
+            verify(diaryImageService).insertDiaryImageUrl(imgUrls, savedId);
+        }
+
+        @Test
+        void 이미지등록_후_예외발생시_이미지삭제_호출() {
+            long userId = 1L;
+            DiaryRequest diaryRequest = new DiaryRequest(1L, "제목", "내용");
+            List<MultipartFile> images = List.of(mock(MultipartFile.class));
+            List<String> imgUrls = List.of("https://s3/image1.jpg", "https://s3/image2.jpg");
+
+            when(diaryImageService.insertDiaryImage(images, userId)).thenReturn(imgUrls);
+            when(diaryRepository.save(any(Diary.class))).thenThrow(new RuntimeException("DB 에러"));
+
+            assertThrows(RuntimeException.class, () -> {
+                diaryService.insertFinalizeDiary(userId, diaryRequest, images);
+            });
+            verify(diaryImageService).deleteDiaryImages(imgUrls);
         }
     }
 

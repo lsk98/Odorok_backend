@@ -9,6 +9,7 @@ import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSu
 import com.odorok.OdorokApplication.course.repository.CourseRepository;
 import com.odorok.OdorokApplication.course.repository.UserDiseaseRepository;
 import com.odorok.OdorokApplication.domain.UserDisease;
+import com.odorok.OdorokApplication.domain.VisitedCourse;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,8 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -115,4 +116,68 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         return result;
     }
 
+    // 테스트를 위한 비효율 방식
+    @Override
+    public List<DiseaseAndCourses> queryCoursesForDiseaseOfBrutal(Long userId, RecommendationCriteria criteria) {
+        List<DiseaseAndCourses> result = new ArrayList<>();
+        // 유저와 같은 질병을 가진 사람들의 아이디를 모아본다.
+        // 사용자의 질병 코드를 읽어옴
+        Set<Long> userDisease = new HashSet<>(
+                userDiseaseQueryService.queryUserDiseases(userId)
+                        .stream()
+                        .map(UserDisease::getDiseaseId).toList());
+
+        // 사용자와 같은 질병 코드를 가진 userID를 검색함.
+        for(Long diseaseId : userDisease) { // 질병 하나당 한 번씩 수행함.
+            Set<Long> sameDiseaseUsers = new HashSet<>();
+            sameDiseaseUsers.add(userId);
+
+            sameDiseaseUsers.addAll(userDiseaseQueryService.queryUsersHavingDisease(diseaseId)
+                    .stream().map(UserDisease::getUserId).toList());
+
+            // 현재 질병 id를 가진 사람들의 방문 코스 정보 모으기
+            List<VisitedCourse> vcourses = visitedCourseQueryService.queryVisitedCourses(userId);
+            for(Long sampledId : sameDiseaseUsers) {
+                vcourses.addAll(visitedCourseQueryService.queryVisitedCourses(sampledId));
+            }
+
+            // 통계정보를 저장해야 하니까..
+            Map<Long, List<VisitedCourse>> mapForCourses = new HashMap<>();
+            for(VisitedCourse course : vcourses) {
+                Long courseId = course.getCourseId();
+                if(!mapForCourses.containsKey(courseId)) {
+                    mapForCourses.put(courseId, new ArrayList<>());
+                }
+                mapForCourses.get(courseId).add(course);
+            }
+
+            // 이제 코스 번호별로 통계 정보를 만들어야 함.
+            List<CourseTempStat> courseRanking = new ArrayList<>();
+            for(Long courseId : mapForCourses.keySet()) {
+                List<VisitedCourse> list = mapForCourses.get(courseId);
+                Double avg = list.stream().collect(Collectors.averagingDouble(VisitedCourse::getStars));
+                CourseTempStat stat = new CourseTempStat(courseId, avg);
+                courseRanking.add(stat);
+            }
+
+            courseRanking.sort((i, j) -> j.avgStars().compareTo(i.avgStars()));
+
+
+            DiseaseAndCourses summary = new DiseaseAndCourses();
+            summary.setDiseaseCode(diseaseId);
+            summary.setCourses(new ArrayList<RecommendedCourseSummary>());
+            for(int i = 0; i < Math.min(5, courseRanking.size()); i++) {
+                summary.getCourses().add(
+                        new RecommendedCourseSummary(
+                                courseRepository.findById(courseRanking.get(i).courseId())
+                                        .orElseThrow(() -> new IllegalArgumentException("지병 별 코스 추천(자바로 처리) : 해당 코스가 없습니다.")),
+                                (int)Math.round(courseRanking.get(i).avgStars()), 0, 0L
+                        )
+                );
+            }
+            result.add(summary);
+        }
+        return result;
+    }
+    record CourseTempStat(Long courseId, Double avgStars) {};
 }

@@ -3,8 +3,11 @@ package com.odorok.OdorokApplication.course.integration;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.DiseaseAndCourses;
 import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
+import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +92,70 @@ public class CourseIntegrationTest {
         assertThat(topVisited).isNotNull();
         assertThat(topReviewCount).isNotNull();
         System.out.println(detail);
+    }
+
+
+    /*
+    신규 부하 테스트.
+    테스트 내용 : 5명의 질병별 코스 추천을 10000번 수행함.
+    예상 결과 : 뷰를 사용한 방식의 연산이 더 빠르다.
+     */
+    @Nested
+    class LoadTester{
+        @Autowired
+        private CourseQueryService courseQueryService;
+
+        @Test
+        @Transactional
+        @Sql("/sql/disease_course_test.sql")
+        public void 질병_코스_부하_테스트_뷰() {
+            Runtime runtime = Runtime.getRuntime();
+            runtime.gc(); // GC 유도
+
+            long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+            long start = System.currentTimeMillis();
+            for(int i = 0; i < 1000; i++) {
+                for(long u = 1l; u <= 5l; u++) {
+                    List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseasesOf(u,
+                            CourseQueryService.RecommendationCriteria.STARS);
+                }
+            }
+            // execution time : 459205
+            long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+            long end = System.currentTimeMillis();
+
+            System.out.println("execution time : " + (end - start) + " ms");
+            System.out.println("used memory : " + (afterUsedMem - beforeUsedMem) + " bytes");
+//            execution time : 409308 ms
+//            used memory : 15160528 bytes
+        }
+
+
+        @Test
+        @Transactional
+        @Sql("/sql/disease_course_test.sql")
+        public void 질병_코스_부하_테스트_자바() {
+            Runtime runtime = Runtime.getRuntime();
+            runtime.gc(); // GC 유도
+
+            long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+            long start = System.currentTimeMillis();
+            for(int i = 0; i < 1000; i++) {
+                for(long u = 1l; u <= 5l; u++) {
+                    List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseaseOfBrutal(u,
+                            CourseQueryService.RecommendationCriteria.STARS);
+                }
+            }
+            // execution time : 459205
+            // execution time : 137262
+            long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+            long end = System.currentTimeMillis();
+
+            System.out.println("execution time : " + (end - start) + " ms");
+            System.out.println("used memory : " + (afterUsedMem - beforeUsedMem) + " bytes");
+//            execution time : 139455 ms
+//            used memory : 5909088 bytes
+        }
     }
 }
 

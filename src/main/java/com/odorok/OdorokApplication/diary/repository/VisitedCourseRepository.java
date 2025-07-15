@@ -6,8 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface VisitedCourseRepository extends JpaRepository<VisitedCourse, Long>, VisitedCourseRepositoryCustom  {
     boolean existsByUserIdAndCourseId(Long userId, Long courseId);
+    List<VisitedCourse> findByUserId(Long userId);
 
     @Query(value = "SELECT AVG(v.stars) FROM visited_courses v WHERE v.course_id = :courseId", nativeQuery = true)
     Double findAvgStarsByCourseId(@Param("courseId") Long courseId);

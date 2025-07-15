@@ -16,4 +16,9 @@ public class UserDiseaseQueryServiceImpl implements UserDiseaseQueryService{
     public List<UserDisease> queryUserDiseases(Long userId) {
         return userDiseaseRepository.findByUserId(userId);
     }
+
+    @Override
+    public List<UserDisease> queryUsersHavingDisease(Long diseaseId) {
+        return userDiseaseRepository.findByDiseaseId(diseaseId);
+    }
 }

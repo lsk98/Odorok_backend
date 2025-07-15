@@ -20,6 +20,7 @@ public interface CourseQueryService {
     List<RecommendedCourseSummary> queryTopRatedCourses(RecommendationCriteria criteria);
     List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria);
     DiseaseAndCourses queryCoursesForDisease(Long diseaseId, RecommendationCriteria criteria);
+    List<DiseaseAndCourses> queryCoursesForDiseaseOfBrutal(Long diseaseId, RecommendationCriteria criteria);
 
     enum RecommendationCriteria {
         STARS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars())),

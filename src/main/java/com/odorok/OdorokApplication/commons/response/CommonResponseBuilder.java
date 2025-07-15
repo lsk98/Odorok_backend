@@ -4,6 +4,7 @@ public final class CommonResponseBuilder {
     private static final String SUCCESS = "success";
     private static final String IN_PROGRESS = "IN_PROGRESS";
     private static final String DONE = "DONE";
+    private static final String CREATED = "CREATED";
 
     //성공 응답
     public static <T> ResponseRoot<T> success(String message, T data) {
@@ -26,6 +27,10 @@ public final class CommonResponseBuilder {
 
     public static <T> ResponseRoot<T> successDone(String message, T data) {
         return success(DONE, message, data);
+    }
+
+    public static <T> ResponseRoot<T> successCreated(String message, T data) {
+        return success(CREATED, message, data);
     }
 
     // 실패 응답 생성

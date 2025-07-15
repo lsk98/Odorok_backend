@@ -112,7 +112,7 @@ public class DiaryController {
         //        long userId = user.getUser().getId();
         long userId = 1L; // 테스트용
         Long savedDiaryId = diaryService.insertFinalizeDiary(userId, diaryRequest, images);
-        ResponseRoot<Map> response = successDone("일지 생성 성공", Map.of("diaryId", savedDiaryId));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        ResponseRoot<Map> response = successCreated("일지 생성 성공", Map.of("diaryId", savedDiaryId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

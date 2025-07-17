@@ -18,9 +18,7 @@ public interface CourseQueryService {
     List<CourseSummary> summarizeCourseCollection( Long userId, List<Course> courses);
     CourseDetail queryCourseDetail(Long courseId);
     List<RecommendedCourseSummary> queryTopRatedCourses(RecommendationCriteria criteria);
-    List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria);
-    DiseaseAndCourses queryCoursesForDisease(Long diseaseId, RecommendationCriteria criteria);
-    List<DiseaseAndCourses> queryCoursesForDiseaseOfBrutal(Long diseaseId, RecommendationCriteria criteria);
+    List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria, Pageable pageable);
 
     enum RecommendationCriteria {
         STARS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars())),

@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.LinkedHashMap;
@@ -94,7 +96,17 @@ public class CourseIntegrationTest {
         System.out.println(detail);
     }
 
+    @Test
+    @Transactional
+    @Sql("/sql/disease_course_test.sql")
+    public void 질병_코스_조회에_성공한다() {
+        String url = UriComponentsBuilder.fromUriString(COMMON_URL).port(port).path(COMMON_PATH+"/disease").queryParam("email", "jihun@example.com").toUriString();
+        ResponseRoot root = restTemplate.getForObject(url, ResponseRoot.class);
+        LinkedHashMap data = (LinkedHashMap) root.getData();
+        List<DiseaseAndCourses> diseaseAndCourses = (List<DiseaseAndCourses>)data.get("items");
 
+        assertThat(diseaseAndCourses).isNotEmpty();
+    }
     /*
     신규 부하 테스트.
     테스트 내용 : 5명의 질병별 코스 추천을 10000번 수행함.
@@ -108,54 +120,63 @@ public class CourseIntegrationTest {
         @Test
         @Transactional
         @Sql("/sql/disease_course_test.sql")
-        public void 질병_코스_부하_테스트_뷰() {
-            Runtime runtime = Runtime.getRuntime();
-            runtime.gc(); // GC 유도
-
-            long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
-            long start = System.currentTimeMillis();
-            for(int i = 0; i < 1000; i++) {
-                for(long u = 1l; u <= 5l; u++) {
-                    List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseasesOf(u,
-                            CourseQueryService.RecommendationCriteria.STARS);
-                }
-            }
-            // execution time : 459205
-            long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
-            long end = System.currentTimeMillis();
-
-            System.out.println("execution time : " + (end - start) + " ms");
-            System.out.println("used memory : " + (afterUsedMem - beforeUsedMem) + " bytes");
-//            execution time : 409308 ms
-//            used memory : 15160528 bytes
+        public void 질병_코스_메서드가_성공한다() {
+            List<DiseaseAndCourses> res = courseQueryService.queryCoursesForDiseasesOf(1L,
+                    CourseQueryService.RecommendationCriteria.STARS, Pageable.ofSize(10));
+            System.out.println(res);
+            assertThat(res).isNotEmpty();
         }
-
-
-        @Test
-        @Transactional
-        @Sql("/sql/disease_course_test.sql")
-        public void 질병_코스_부하_테스트_자바() {
-            Runtime runtime = Runtime.getRuntime();
-            runtime.gc(); // GC 유도
-
-            long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
-            long start = System.currentTimeMillis();
-            for(int i = 0; i < 1000; i++) {
-                for(long u = 1l; u <= 5l; u++) {
-                    List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseaseOfBrutal(u,
-                            CourseQueryService.RecommendationCriteria.STARS);
-                }
-            }
-            // execution time : 459205
-            // execution time : 137262
-            long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
-            long end = System.currentTimeMillis();
-
-            System.out.println("execution time : " + (end - start) + " ms");
-            System.out.println("used memory : " + (afterUsedMem - beforeUsedMem) + " bytes");
-//            execution time : 139455 ms
-//            used memory : 5909088 bytes
-        }
+//        @Test
+//        @Transactional
+//        @Sql("/sql/disease_course_test.sql")
+//        public void 질병_코스_부하_테스트_뷰() {
+//            Runtime runtime = Runtime.getRuntime();
+//            runtime.gc(); // GC 유도
+//
+//            long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+//            long start = System.currentTimeMillis();
+//            for(int i = 0; i < 1000; i++) {
+//                for(long u = 1l; u <= 5l; u++) {
+//                    List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseasesOf(u,
+//                            CourseQueryService.RecommendationCriteria.STARS);
+//                }
+//            }
+//            // execution time : 459205
+//            long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+//            long end = System.currentTimeMillis();
+//
+//            System.out.println("execution time : " + (end - start) + " ms");
+//            System.out.println("used memory : " + (afterUsedMem - beforeUsedMem) + " bytes");
+////            execution time : 409308 ms
+////            used memory : 15160528 bytes
+//        }
+//
+//
+//        @Test
+//        @Transactional
+//        @Sql("/sql/disease_course_test.sql")
+//        public void 질병_코스_부하_테스트_자바() {
+//            Runtime runtime = Runtime.getRuntime();
+//            runtime.gc(); // GC 유도
+//
+//            long beforeUsedMem = runtime.totalMemory() - runtime.freeMemory();
+//            long start = System.currentTimeMillis();
+//            for(int i = 0; i < 1000; i++) {
+//                for(long u = 1l; u <= 5l; u++) {
+//                    List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseaseOfBrutal(u,
+//                            CourseQueryService.RecommendationCriteria.STARS);
+//                }
+//            }
+//            // execution time : 459205
+//            // execution time : 137262
+//            long afterUsedMem = runtime.totalMemory() - runtime.freeMemory();
+//            long end = System.currentTimeMillis();
+//
+//            System.out.println("execution time : " + (end - start) + " ms");
+//            System.out.println("used memory : " + (afterUsedMem - beforeUsedMem) + " bytes");
+////            execution time : 139455 ms
+////            used memory : 5909088 bytes
+//        }
     }
 }
 

@@ -3,12 +3,17 @@ package com.odorok.OdorokApplication.course.controller;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.course.dto.response.holder.CourseResponse;
+import com.odorok.OdorokApplication.course.dto.response.holder.DiseaseCourseResponse;
 import com.odorok.OdorokApplication.course.dto.response.holder.TopRatedCourseResponse;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.DiseaseAndCourses;
 import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
+import com.odorok.OdorokApplication.course.service.VisitedCourseQueryService;
+import com.odorok.OdorokApplication.domain.VisitedCourse;
 import com.odorok.OdorokApplication.security.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +21,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.util.List;
 
@@ -30,7 +33,7 @@ import java.util.List;
 public class CourseApiController {
     private final CourseQueryService courseQueryService;
     private final UserService userService;
-
+    private final VisitedCourseQueryService visitedCourseQueryService;
     @GetMapping("/region")
     public ResponseEntity<ResponseRoot<CourseResponse>> searchByRegionCode(@RequestParam("sidoCode") Integer sidoCode,
                                                                            @RequestParam("sigunguCode") Integer sigunguCode,
@@ -97,6 +100,19 @@ public class CourseApiController {
     }
 
     // 사용자 질병 코스 리스트
+    @GetMapping("/disease")
+    public ResponseEntity<ResponseRoot<DiseaseCourseResponse>> getCoursesForDisease(@RequestParam("email") String email,
+                                                                                    @PageableDefault Pageable pageable) {
+        Long userId = userService.queryByEmail(email).getId();
+        log.debug("disease request에 대한 유저 아이디 = " + userId);
+        log.debug("방문코스 : " + visitedCourseQueryService.queryVisitedCourses(userId));
+        List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseasesOf(userId, CourseQueryService.RecommendationCriteria.STARS, pageable);
+        log.debug("disease request응답 = " + diseaseAndCourses.toString());
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(
+                CommonResponseBuilder.success("", new DiseaseCourseResponse(diseaseAndCourses))
+        );
+    }
+
     // insert into health_infos values(null, 1, 1, 175, 70, 25, 1, 13, 2, 1);g
     // 사용자 지역 코스 리스트
     

@@ -2,6 +2,7 @@ package com.odorok.OdorokApplication.community.service;
 
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
+import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
 import com.odorok.OdorokApplication.draftDomain.Article;
@@ -114,5 +115,32 @@ class ArticleServiceTest {
         when(articleRepository.getById(14L)).thenThrow(new EntityNotFoundException("게시물이 존재하지 않습니다"));
         //then
         assertThrows(EntityNotFoundException.class, ()-> articleService.findByArticleId(14L));
+    }
+
+    @Test
+    void 게시글_수정(){
+        // given
+        List<String> newUrls = List.of("new1", "new2");
+        List<String> oldUrls = List.of("old1", "old2");
+        Long articleId = 1L;
+        Long userId = 1L;
+        List<MultipartFile> images = null;
+        ArticleUpdateRequest request = new ArticleUpdateRequest();
+        //when
+        when(articleImageService.insertArticleImages(userId,images)).thenReturn(newUrls);
+        when(articleTransactionService.updateArticleInfo(request,newUrls,articleId)).thenReturn(oldUrls);
+        articleService.updateArticle(request,images,articleId,userId);
+        verify(articleImageService,times(1)).insertArticleImages(userId,images);
+        verify(articleTransactionService,times(1)).updateArticleInfo(request,newUrls,articleId);
+        verify(articleImageService,times(1)).deleteImages(oldUrls);
+
+    }
+    @Test
+    void 좋아요_업데이트(){
+
+    }
+    @Test
+    void 댓글_작성_성공(){
+
     }
 }

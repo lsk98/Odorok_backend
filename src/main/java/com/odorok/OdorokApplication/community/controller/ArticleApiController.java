@@ -50,14 +50,14 @@ public class ArticleApiController {
     }
 
     @DeleteMapping("/{articles-id}")
-    @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
+    //@PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
     public ResponseEntity<ResponseRoot<Void>> deleteArticle(@PathVariable("articles-id") Long articleId) {
         articleService.deleteArticle(articleId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 삭제되었습니다."));
     }
 
     @PutMapping("/{articles-id}")
-    @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
+    //@PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
     public ResponseEntity<ResponseRoot<Void>> updateArticle(@RequestPart("data") ArticleUpdateRequest request,
                                                             @RequestPart(name = "images") List<MultipartFile> images,
                                                             @PathVariable("articles-id") Long articleId,

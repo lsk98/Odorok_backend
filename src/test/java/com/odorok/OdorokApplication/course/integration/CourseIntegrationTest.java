@@ -5,7 +5,9 @@ import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
 import com.odorok.OdorokApplication.course.dto.response.item.DiseaseAndCourses;
 import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
+import com.odorok.OdorokApplication.course.repository.UserDiseaseRepository;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
+import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,12 @@ public class CourseIntegrationTest {
     private static final Logger log = LoggerFactory.getLogger(CourseIntegrationTest.class);
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private VisitedCourseRepository visitedCourseRepository;
+
+    @Autowired
+    private UserDiseaseRepository userDiseaseRepository;
 
     @LocalServerPort
     private int port;
@@ -77,7 +85,8 @@ public class CourseIntegrationTest {
 
     @Test
     @Sql("/sql/test-vcourse.sql")
-    @Sql(statements = "delete from visited_courses where review = 'review'", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @Sql(statements = {"delete from visited_courses where review = 'review'",
+            "delete from user_diseases", "delete from health_infos"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void TOP_코스_조회에_성공한다() {
         String url = UriComponentsBuilder.fromUriString(COMMON_URL)
                 .port(port).path(COMMON_PATH+"/top").toUriString();
@@ -97,8 +106,9 @@ public class CourseIntegrationTest {
     }
 
     @Test
-    @Transactional
     @Sql("/sql/disease_course_test.sql")
+    @Sql(statements = {"delete from visited_courses where review = 'review'",
+    "delete from user_diseases", "delete from health_infos"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void 질병_코스_조회에_성공한다() {
         String url = UriComponentsBuilder.fromUriString(COMMON_URL).port(port).path(COMMON_PATH+"/disease").queryParam("email", "jihun@example.com").toUriString();
         ResponseRoot root = restTemplate.getForObject(url, ResponseRoot.class);

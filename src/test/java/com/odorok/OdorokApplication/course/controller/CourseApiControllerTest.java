@@ -3,7 +3,7 @@ package com.odorok.OdorokApplication.course.controller;
 import com.odorok.OdorokApplication.course.dto.response.item.*;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
-import com.odorok.OdorokApplication.security.domain.User;
+import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.security.service.UserService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ class CourseApiControllerTest {
     public void 가입된_사용자가_지역_코드로_코스_조회에_성공한다() throws Exception {
         // given
         int sidoCode = 1, sigunguCode = 1;
-        Mockito.when(userService.selectByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.eq(sidoCode), Mockito.eq(sigunguCode), Mockito.eq(1L), Mockito.any())).thenReturn(List.of(
                 CourseSummary.builder()
                         .courseId(1l).courseName("코스1").gilName("GIL001")
@@ -77,7 +77,7 @@ class CourseApiControllerTest {
 
     @Test
     public void 전체코스_조회에_성공한다() throws Exception{
-        Mockito.when(userService.selectByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryAllCourses(Mockito.eq(TEST_USER_ID), Mockito.any(Pageable.class))).thenReturn(List.of(
                         CourseSummary.builder()
                                 .courseId(1l).courseName("코스1").gilName("GIL001")
@@ -135,7 +135,7 @@ class CourseApiControllerTest {
 
     @Test
     public void 질병_코스_조회에_성공한다() throws Exception {
-        Mockito.when(userService.selectByEmail(Mockito.anyString())).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(userService.queryByEmail("email")).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryCoursesForDiseasesOf(Mockito.eq(TEST_USER_ID), Mockito.any(), Mockito.any(Pageable.class)))
                 .thenReturn(List.of(
                         new DiseaseAndCourses(1L, List.of()),

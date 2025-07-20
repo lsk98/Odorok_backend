@@ -12,6 +12,7 @@ import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSu
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import com.odorok.OdorokApplication.course.service.VisitedCourseQueryService;
 import com.odorok.OdorokApplication.domain.VisitedCourse;
+import com.odorok.OdorokApplication.security.domain.User;
 import com.odorok.OdorokApplication.security.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ import java.util.List;
 public class CourseApiController {
     private final CourseQueryService courseQueryService;
     private final UserService userService;
-    private final VisitedCourseQueryService visitedCourseQueryService;
+
     @GetMapping("/region")
     public ResponseEntity<ResponseRoot<CourseResponse>> searchByRegionCode(@RequestParam("sidoCode") Integer sidoCode,
                                                                            @RequestParam("sigunguCode") Integer sigunguCode,
@@ -42,7 +43,7 @@ public class CourseApiController {
             // 페이징 넣기.
             log.debug("지역 코스 검색 리퀘스트 : {}, {}, {}, {}, {}", sidoCode, sigunguCode, email, pageable.getPageNumber(), pageable.getPageSize());
             Long userId = null;
-            if(email != null) userId = userService.selectByEmail(email).getId();
+            if(email != null) userId = userService.queryByEmail(email).getId();
             CourseResponse response = new CourseResponse();
             try {
                 response.setItems(courseQueryService.queryCoursesByRegion(sidoCode, sigunguCode, userId, pageable));
@@ -60,7 +61,7 @@ public class CourseApiController {
             @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable) {
         log.debug("지역 코스 검색 리퀘스트 : {}, {}, {}", email, pageable.getPageNumber(), pageable.getPageSize());
         Long userId = null;
-        if(email != null) userId = userService.selectByEmail(email).getId();
+        if(email != null) userId = userService.queryByEmail(email).getId();
         try {
             List<CourseSummary> result = courseQueryService.queryAllCourses(userId, pageable);
             return ResponseEntity.status(HttpStatus.OK).body(CommonResponseBuilder.success("", new CourseResponse(result)));
@@ -103,9 +104,9 @@ public class CourseApiController {
     @GetMapping("/disease")
     public ResponseEntity<ResponseRoot<DiseaseCourseResponse>> getCoursesForDisease(@RequestParam("email") String email,
                                                                                     @PageableDefault Pageable pageable) {
-        Long userId = userService.queryByEmail(email).getId();
+        com.odorok.OdorokApplication.domain.User user = userService.queryByEmail(email);
+        Long userId = user.getId();
         log.debug("disease request에 대한 유저 아이디 = " + userId);
-        log.debug("방문코스 : " + visitedCourseQueryService.queryVisitedCourses(userId));
         List<DiseaseAndCourses> diseaseAndCourses = courseQueryService.queryCoursesForDiseasesOf(userId, CourseQueryService.RecommendationCriteria.STARS, pageable);
         log.debug("disease request응답 = " + diseaseAndCourses.toString());
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(

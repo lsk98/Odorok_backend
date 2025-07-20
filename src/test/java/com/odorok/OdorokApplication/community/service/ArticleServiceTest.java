@@ -3,8 +3,12 @@ package com.odorok.OdorokApplication.community.service;
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
+import com.odorok.OdorokApplication.community.dto.request.CommentRegistRequest;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
+import com.odorok.OdorokApplication.community.repository.CommentRepository;
+import com.odorok.OdorokApplication.community.repository.LikeRepository;
+import com.odorok.OdorokApplication.domain.Like;
 import com.odorok.OdorokApplication.draftDomain.Article;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -35,6 +39,10 @@ class ArticleServiceTest {
     ArticleRepository articleRepository;
     @Mock
     ArticleTransactionService articleTransactionService;
+    @Mock
+    LikeRepository likeRepository;
+    @Mock
+    CommentRepository commentRepository;
     @InjectMocks
     ArticleServiceImpl articleService;
 
@@ -137,10 +145,25 @@ class ArticleServiceTest {
     }
     @Test
     void 좋아요_업데이트(){
+        //given
+        Long articleId = 1L;
+        Long userId = 1L;
+        Integer count = 3;
+        Article article = Article.builder().likeCount(count).build();
+        //when
+        when(articleRepository.getById(articleId)).thenReturn(article);
+        //then
+        articleService.updateLike(articleId,userId);
+        verify(likeRepository,times(1)).save(any());
+        assertEquals(count+1,article.getLikeCount());
 
     }
     @Test
     void 댓글_작성_성공(){
-
+        Long articleId = 1L;
+        CommentRegistRequest request = new CommentRegistRequest();
+        Long userId = 1L;
+        articleService.registComment(articleId,request,userId);
+        verify(commentRepository,times(1)).save(any());
     }
 }

@@ -26,7 +26,7 @@ public class CommentApiController {
         return ResponseEntity.ok(CommonResponseBuilder.success("댓글 수정 성공"));
     }
 
-    @PutMapping("/{comment-id}")
+    @DeleteMapping("/{comment-id}")
     //@PreAuthorize("@commentPermissionEvaluator.isOwner(#commentId)")
     public ResponseEntity<ResponseRoot<Void>> deleteComment(@PathVariable("comment-id") Long commentId
     ){

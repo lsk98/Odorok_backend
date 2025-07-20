@@ -35,8 +35,11 @@ public class DiaryController {
     private final DiaryService diaryService;
 
     @GetMapping("/{diaryId}")
-    public ResponseEntity<?> searchDiaryById(@PathVariable long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
-        long userId = user.getUser().getId();
+    public ResponseEntity<?> searchDiaryById(@PathVariable long diaryId
+            , @AuthenticationPrincipal CustomUserDetails user
+    ) {
+//        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
         DiaryDetail diary = diaryService.findDiaryById(userId, diaryId);
         if(diary == null) {
             throw new NotFoundException("해당 일지를 찾을 수 없습니다.");

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CourseStat {
+public class CourseStat implements CourseStatSummary{
     private Long courseId;
     private Double avgStars;
     private Long reviewCount;

@@ -1,26 +1,30 @@
 package com.odorok.OdorokApplication.diary.service;
 
+import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
+import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedAdditionalAttraction;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.domain.Diary;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.gpt.service.GptService;
 import com.odorok.OdorokApplication.diary.repository.InventoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.junit.jupiter.api.Nested;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDateTime;
@@ -39,6 +43,9 @@ public class DiaryServiceImplTest {
 
     @Mock
     private InventoryRepository inventoryRepository;
+
+    @Mock
+    private VisitedCourseRepository visitedCourseRepository;
 
     @InjectMocks
     private DiaryServiceImpl diaryService;
@@ -182,6 +189,23 @@ public class DiaryServiceImplTest {
         assertEquals("생성권 아이템 수량이 부족합니다.", ex.getMessage());
     }
 
+    @Test
+    void 방문_완료_및_일지_생성_이전인_방문코스_목록_조회_성공() {
+        long userId = 1L;
+        List<VisitedCourseSummary> mockList = List.of(
+                new VisitedCourseSummary(1L, LocalDateTime.of(2024, 1, 1, 10, 0), "Course A"),
+                new VisitedCourseSummary(2L, LocalDateTime.of(2024, 2, 1, 10, 0), "Course B")
+        );
+        when(visitedCourseRepository.findVisitedCourseWithoutDiaryByUserId(userId))
+                .thenReturn(mockList);
+
+        VisitedCourseWithoutDiaryResponse response = diaryService.findVisitedCourseWithoutDiaryByUserId(userId);
+
+        assertNotNull(response);
+        assertEquals(2, response.getResponse().size());
+        assertEquals("Course A", response.getResponse().get(0).getCourseName());
+
+    }
 
     @Nested
     class InsertGenerationTests {
@@ -332,6 +356,172 @@ public class DiaryServiceImplTest {
                     diaryService.insertAnswer(userId, new DiaryChatAnswerRequest(newAnswer, chatLog)));
 
             assertEquals("GPT 응답이 비어있음 ", ex.getMessage());
+        }
+    }
+
+    @Nested
+    class InsertRegenerationTest{
+        @Mock
+        private GptService gptService;
+
+        @InjectMocks
+        private DiaryServiceImpl diaryService;
+
+        private final long userId = 1L;
+
+        private final String regenerationPrompt = """
+                완성된 일지가 마음에 들지 않습니다. 사실과 순서는 그대로 두고, 전반적인 문장 흐름/가독성/톤을 자연스럽게 다듬어 다시 작성해주세요.\s
+                    일지 내용에 지금 내용을 포함하지 않고, 이전 내용을 참고해 작성해주세요.\s
+                    구체적인 피드백을 참고해 다시 작성해주세요. 다음과 같습니다. `{feedback}`
+                    일지는 마찬가지로 마무리 멘트 없이 바로 일기만 출력합니다. 마지막에 반드시 `<END>`를 붙입니다
+                """;
+        private final String defaultFeedbackPrompt = """
+                앞서 말했듯 사실과 순서는 그대로 두고, 문장 흐름과 가독성을 자연스럽게 다듬어 다시 작성해주세요.
+                    주요 감정(느낀 점)을 강조해주고, 일지를 읽었을 때 사용자가 그 때의 감정과 기분을 생생하게 느낄 수 있도록 작성해주세요.
+                    중복 표현을 되도록 줄여주세요. 핵심 정보는 유지하면서 전체적인 스타일은 이전에 요청한대로 반영해서 작성해주세요.\s
+                """;
+
+        private List<GptService.Prompt> chatLog;
+        private String feedback;
+        private List<GptService.Prompt> returnChatLog;
+
+        @BeforeEach
+        void setUp() {
+            ReflectionTestUtils.setField(diaryService, "regenerationPrompt",regenerationPrompt);
+            ReflectionTestUtils.setField(diaryService, "defaultFeedbackPrompt",defaultFeedbackPrompt);
+
+            feedback = "일지 말투가 너무 딱딱해요. 조금 더 자연스럽게 해주세요.";
+        }
+
+        @Test
+        void 일지_재생성_사용자_피드백_있는_경우_요청_성공() {
+            // given
+            GptService.Prompt prompt = diaryService.buildRegenerationPrompt(feedback);
+            chatLog = List.of(prompt);
+            GptService.Prompt responsePrompt = new GptService.Prompt("assistant", "재생성된 일지입니다. <END>");
+            returnChatLog = new ArrayList<>(chatLog);
+            returnChatLog.add(responsePrompt);
+            when(gptService.sendPrompt(anyList(), any(GptService.Prompt.class))).thenReturn(returnChatLog);
+
+            // when
+            DiaryChatResponse response = diaryService.insertRegeneration(userId, new DiaryRegenerationRequest(feedback, chatLog));
+
+            List<GptService.Prompt> responseChatLog = response.getChatLog();
+            GptService.Prompt userResponsePrompt = responseChatLog.get(responseChatLog.size() - 2);
+            GptService.Prompt assistantResponsePrompt = responseChatLog.get(responseChatLog.size() - 1);
+
+            // then
+            assertNotNull(response);
+            assertEquals(assistantResponsePrompt.getRole(), "assistant");
+            assertEquals(userResponsePrompt.getRole(), "user");
+            assertTrue(userResponsePrompt.getContent().contains(feedback));
+            verify(gptService, times(1)).sendPrompt(anyList(), any(GptService.Prompt.class));
+        }
+
+        @Test
+        void 일지_재생성_사용자_피드백_없는_경우_요청_성공() {
+            // given
+            feedback = null;
+            GptService.Prompt prompt = diaryService.buildRegenerationPrompt(defaultFeedbackPrompt);
+            chatLog = List.of(prompt);
+            GptService.Prompt responsePrompt = new GptService.Prompt("assistant", "재생성된 일지입니다. <END>");
+            returnChatLog = new ArrayList<>(chatLog);
+            returnChatLog.add(responsePrompt);
+            when(gptService.sendPrompt(anyList(), any(GptService.Prompt.class))).thenReturn(returnChatLog);
+
+            // when
+            DiaryChatResponse response = diaryService.insertRegeneration(userId, new DiaryRegenerationRequest(null, chatLog));
+
+            List<GptService.Prompt> responseChatLog = response.getChatLog();
+            GptService.Prompt userResponsePrompt = responseChatLog.get(responseChatLog.size() - 2);
+            GptService.Prompt assistantResponsePrompt = responseChatLog.get(responseChatLog.size() - 1);
+
+            // then
+            assertNotNull(response);
+            assertEquals(assistantResponsePrompt.getRole(), "assistant");
+            assertEquals(userResponsePrompt.getRole(), "user");
+            assertTrue(userResponsePrompt.getContent().contains(defaultFeedbackPrompt));
+            verify(gptService, times(1)).sendPrompt(anyList(), any(GptService.Prompt.class));
+        }
+        @Test
+        void 일지_재생성_시_GPT_응답에_END_누락() {
+            // given
+            chatLog = List.of(diaryService.buildRegenerationPrompt(feedback));
+            GptService.Prompt responsePrompt = new GptService.Prompt("assistant", "재생성된 일지입니다.");
+            returnChatLog = new ArrayList<>(chatLog);
+            returnChatLog.add(responsePrompt);
+            when(gptService.sendPrompt(anyList(), any(GptService.Prompt.class))).thenReturn(returnChatLog);
+
+            GptCommunicationException ex = assertThrows(GptCommunicationException.class, () ->
+                    diaryService.insertRegeneration(userId, new DiaryRegenerationRequest(feedback, chatLog)));
+
+            assertEquals("GPT 응답에 <END> 토큰이 누락", ex.getMessage());
+        }
+
+        @Test
+        void 사용자_답변_후_gpt_호출_응답없음_예외발생() {
+            // given
+            chatLog = List.of(diaryService.buildRegenerationPrompt(feedback));
+            when(gptService.sendPrompt(anyList(), any(GptService.Prompt.class))).thenReturn(List.of());
+
+            // when & then
+            GptCommunicationException ex = assertThrows(GptCommunicationException.class, () ->
+                    diaryService.insertRegeneration(userId, new DiaryRegenerationRequest(feedback, chatLog)));
+
+            assertEquals("GPT 응답이 비어있음 ", ex.getMessage());
+        }
+    }
+
+    @Nested
+    class InsergFinalizeTest {
+        @Mock
+        private DiaryImageService diaryImageService;
+
+        @Mock
+        private DiaryRepository diaryRepository;
+
+        @InjectMocks
+        private DiaryServiceImpl diaryService;
+
+        @Test
+        void 최종_일지_저장_성공() {
+            long userId = 1L;
+            DiaryRequest diaryRequest = new DiaryRequest(1L, "일지 제목", "일지 내용");
+            List<MultipartFile> images = List.of(mock(MultipartFile.class));
+            List<String> imgUrls = List.of("https://s3/image1.jpg", "https://s3/image2.jpg");
+
+            Diary savedDiary = Diary.builder()
+                    .id(100L)
+                    .title(diaryRequest.getTitle())
+                    .content(diaryRequest.getContent())
+                    .userId(userId)
+                    .vcourseId(diaryRequest.getVcourseId())
+                    .build();
+
+            when(diaryImageService.insertDiaryImage(images, userId)).thenReturn(imgUrls);
+            when(diaryRepository.save(any(Diary.class))).thenReturn(savedDiary);
+
+            Long savedId = diaryService.insertFinalizeDiary(userId, diaryRequest, images);
+            assertEquals(savedDiary.getId(), savedId);
+            verify(diaryImageService).insertDiaryImage(images, userId);
+            verify(diaryRepository).save(any(Diary.class));
+            verify(diaryImageService).insertDiaryImageUrl(imgUrls, savedId);
+        }
+
+        @Test
+        void 이미지등록_후_예외발생시_이미지삭제_호출() {
+            long userId = 1L;
+            DiaryRequest diaryRequest = new DiaryRequest(1L, "제목", "내용");
+            List<MultipartFile> images = List.of(mock(MultipartFile.class));
+            List<String> imgUrls = List.of("https://s3/image1.jpg", "https://s3/image2.jpg");
+
+            when(diaryImageService.insertDiaryImage(images, userId)).thenReturn(imgUrls);
+            when(diaryRepository.save(any(Diary.class))).thenThrow(new RuntimeException("DB 에러"));
+
+            assertThrows(RuntimeException.class, () -> {
+                diaryService.insertFinalizeDiary(userId, diaryRequest, images);
+            });
+            verify(diaryImageService).deleteDiaryImages(imgUrls);
         }
     }
 

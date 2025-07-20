@@ -2,6 +2,8 @@ package com.odorok.OdorokApplication.diary.service;
 
 import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
+import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.dto.gpt.VisitedCourseAndAttraction;
@@ -9,6 +11,7 @@ import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.util.PromptTemplate;
+import com.odorok.OdorokApplication.domain.Diary;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.draftDomain.Item;
 import com.odorok.OdorokApplication.gpt.service.GptService;
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -32,11 +36,18 @@ public class DiaryServiceImpl implements DiaryService{
     private final InventoryRepository inventoryRepository;
     private final ItemRepository itemRepository;
     private final VisitedCourseRepository visitedCourseRepository;
+    private final DiaryImageService diaryImageService;
 
     private Long diaryPermissionItemId;
 
     @Value("${gpt.system-prompt}")
     private String rawSystemPrompt;
+
+    @Value("${gpt.regeneration-prompt}")
+    private String regenerationPrompt;
+
+    @Value("${gpt.default-feedback-prompt}")
+    private String defaultFeedbackPrompt;
 
     // 일지 생성권 itemId 캐싱.
     @PostConstruct
@@ -118,7 +129,7 @@ public class DiaryServiceImpl implements DiaryService{
         List<GptService.Prompt> chatLog = gptService.sendPrompt(request.getChatLog(), newPrompt);
         if (chatLog.isEmpty()) {
             log.warn("GPT 응답이 비어 있음. chatLog: {}\nprompt: {}", chatLog, newPrompt);
-            throw new RuntimeException("GPT 응답이 비어있음 ");
+            throw new GptCommunicationException("GPT 응답이 비어있음 ");
         }
         String newContent = chatLog.get(chatLog.size() - 1).getContent();
         return new DiaryChatResponse(newContent, chatLog);
@@ -128,5 +139,61 @@ public class DiaryServiceImpl implements DiaryService{
     public VisitedCourseWithoutDiaryResponse findVisitedCourseWithoutDiaryByUserId(long userId) {
         List<VisitedCourseSummary> result = visitedCourseRepository.findVisitedCourseWithoutDiaryByUserId(userId);
         return new VisitedCourseWithoutDiaryResponse(result);
+    }
+
+    @Override
+    public DiaryChatResponse insertRegeneration(long userId, DiaryRegenerationRequest request) {
+        // answer로 프롬프트 생성
+        String feedback = request.getFeedback();
+        if(feedback == null) {
+            // 피드백이 없는 경우 들어갈 기본 피드백
+            feedback = defaultFeedbackPrompt;
+        }
+        GptService.Prompt newPrompt = buildRegenerationPrompt(feedback);
+        List<GptService.Prompt> chatLog = gptService.sendPrompt(request.getChatLog(), newPrompt);
+        if (chatLog.isEmpty()) {
+            log.warn("GPT 응답이 비어 있음. chatLog: {}\nprompt: {}", chatLog, newPrompt);
+            throw new GptCommunicationException("GPT 응답이 비어있음 ");
+        }
+        String newContent = chatLog.get(chatLog.size() - 1).getContent();
+        if(!newContent.endsWith("<END>")) {
+            throw new GptCommunicationException("GPT 응답에 <END> 토큰이 누락");
+        }
+        return new DiaryChatResponse(newContent, chatLog);
+    }
+
+    public GptService.Prompt buildRegenerationPrompt(String feedback) {
+        String regenerationPromptWithFeedback = PromptTemplate.of(regenerationPrompt)
+                .with("feedback", feedback)
+                .build();
+        return new GptService.Prompt("user", regenerationPromptWithFeedback);
+    }
+
+    @Override
+    @Transactional
+    public Long insertFinalizeDiary(long userId, DiaryRequest diaryRequest, List<MultipartFile> images) {
+        List<String> imageUrls = null;
+        try {
+            // s3에 이미지 등록
+            imageUrls = diaryImageService.insertDiaryImage(images, userId);
+
+            // 일지 title, content 등록
+            Diary diary = Diary.builder()
+                    .title(diaryRequest.getTitle())
+                    .content(diaryRequest.getContent())
+                    .vcourseId(diaryRequest.getVcourseId())
+                    .userId(userId)
+                    .build();
+            Diary savedDiary = diaryRepository.save(diary);
+
+            // 일지 이미지 url db에 등록
+            diaryImageService.insertDiaryImageUrl(imageUrls, savedDiary.getId());
+
+            return savedDiary.getId();
+        } catch (Exception e) {
+            diaryImageService.deleteDiaryImages(imageUrls);
+            log.error("일지 DB 등록 중 예외 발생 - 이미지 정리 후 예외 전파", e);
+            throw e;
+        }
     }
 }

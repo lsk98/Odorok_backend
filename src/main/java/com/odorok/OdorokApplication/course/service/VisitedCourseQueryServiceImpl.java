@@ -2,6 +2,7 @@ package com.odorok.OdorokApplication.course.service;
 
 import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
+import com.odorok.OdorokApplication.domain.VisitedCourse;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,5 +34,10 @@ public class VisitedCourseQueryServiceImpl implements VisitedCourseQueryService{
     @Override
     public List<CourseStat> queryCourseStatistics() {
         return visitedCourseRepository.summarizeCourseFeedback();
+    }
+
+    @Override
+    public List<VisitedCourse> queryVisitedCourses(Long userId) {
+        return visitedCourseRepository.findByUserId(userId);
     }
 }

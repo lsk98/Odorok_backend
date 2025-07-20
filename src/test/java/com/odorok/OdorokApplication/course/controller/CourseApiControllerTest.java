@@ -1,13 +1,11 @@
 package com.odorok.OdorokApplication.course.controller;
 
-import com.odorok.OdorokApplication.course.dto.response.item.Coord;
-import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
-import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
-import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.*;
 import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
-import com.odorok.OdorokApplication.security.domain.User;
+import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.security.service.UserService;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -17,13 +15,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.xml.transform.Result;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,7 +55,7 @@ class CourseApiControllerTest {
     public void 가입된_사용자가_지역_코드로_코스_조회에_성공한다() throws Exception {
         // given
         int sidoCode = 1, sigunguCode = 1;
-        Mockito.when(userService.selectByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.eq(sidoCode), Mockito.eq(sigunguCode), Mockito.eq(1L), Mockito.any())).thenReturn(List.of(
                 CourseSummary.builder()
                         .courseId(1l).courseName("코스1").gilName("GIL001")
@@ -75,7 +77,7 @@ class CourseApiControllerTest {
 
     @Test
     public void 전체코스_조회에_성공한다() throws Exception{
-        Mockito.when(userService.selectByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryAllCourses(Mockito.eq(TEST_USER_ID), Mockito.any(Pageable.class))).thenReturn(List.of(
                         CourseSummary.builder()
                                 .courseId(1l).courseName("코스1").gilName("GIL001")
@@ -129,5 +131,24 @@ class CourseApiControllerTest {
         resultActions.andDo(MockMvcResultHandlers.print());
 
         Mockito.verify(courseQueryService, Mockito.times(3)).queryTopRatedCourses(Mockito.any(CourseQueryService.RecommendationCriteria.class));
+    }
+
+    @Test
+    public void 질병_코스_조회에_성공한다() throws Exception {
+        Mockito.when(userService.queryByEmail("email")).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(courseQueryService.queryCoursesForDiseasesOf(Mockito.eq(TEST_USER_ID), Mockito.any(), Mockito.any(Pageable.class)))
+                .thenReturn(List.of(
+                        new DiseaseAndCourses(1L, List.of()),
+                        new DiseaseAndCourses(3L, List.of()),
+                        new DiseaseAndCourses(5L, List.of())
+                ));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/disease")
+                .param("email", "email"));
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.items").isNotEmpty());
+        resultActions.andDo(MockMvcResultHandlers.print());
+
+        Mockito.verify(courseQueryService, Mockito.times(1)).queryCoursesForDiseasesOf(Mockito.eq(TEST_USER_ID), Mockito.any(), Mockito.any(Pageable.class));
     }
 }

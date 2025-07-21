@@ -6,7 +6,9 @@ import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
+import com.odorok.OdorokApplication.community.dto.request.CommentRegistRequest;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
+import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.service.ArticleService;
 import com.odorok.OdorokApplication.draftDomain.Article;
 import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
@@ -48,14 +50,14 @@ public class ArticleApiController {
     }
 
     @DeleteMapping("/{articles-id}")
-    @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
+    //@PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
     public ResponseEntity<ResponseRoot<Void>> deleteArticle(@PathVariable("articles-id") Long articleId) {
         articleService.deleteArticle(articleId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 삭제되었습니다."));
     }
 
     @PutMapping("/{articles-id}")
-    @PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
+    //@PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
     public ResponseEntity<ResponseRoot<Void>> updateArticle(@RequestPart("data") ArticleUpdateRequest request,
                                                             @RequestPart(name = "images") List<MultipartFile> images,
                                                             @PathVariable("articles-id") Long articleId,
@@ -64,5 +66,28 @@ public class ArticleApiController {
         Long userId = user.getUser().getId();
         articleService.updateArticle(request,images,articleId,userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 수정되었습니다."));
+    }
+    @PostMapping("/{articles-id}/likes")
+    public ResponseEntity<ResponseRoot<Void>> updateArticle(@PathVariable("articles-id") Long articleId,
+                                                            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long userId = user.getUser().getId();
+        articleService.updateLike(articleId,userId);
+        return ResponseEntity.ok(CommonResponseBuilder.success("좋아요가 등록되었습니다."));
+    }
+    @GetMapping("/{articles-id}/comments")
+    public ResponseEntity<ResponseRoot<List<CommentSummary>>> searchComments(@PathVariable("articles-id") Long articleId
+    ) {
+        List<CommentSummary> result = articleService.findCommentsByArticleId(articleId);
+        return ResponseEntity.ok(CommonResponseBuilder.success("댓글을 성공적으로 불러왔습니다.",result));
+    }
+    @PostMapping("/{articles-id}/comments")
+    public ResponseEntity<ResponseRoot<Void>> registComment(@PathVariable("articles-id") Long articleId,
+                                                           @AuthenticationPrincipal CustomUserDetails user,
+                                                           @RequestBody CommentRegistRequest request
+    ) {
+        Long userId = user.getUser().getId();
+        articleService.registComment(articleId,request,userId);
+        return ResponseEntity.ok(CommonResponseBuilder.success("댓글 작성 성공"));
     }
 }

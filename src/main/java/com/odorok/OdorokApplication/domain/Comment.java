@@ -2,6 +2,10 @@ package com.odorok.OdorokApplication.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -23,10 +27,12 @@ public class Comment {
     @Column(length = 10000)
     private String content;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "modified_at", nullable = false)
+    @UpdateTimestamp
+    @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
     @Column(name = "user_id", nullable = false)

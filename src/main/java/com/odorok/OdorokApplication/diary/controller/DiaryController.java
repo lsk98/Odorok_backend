@@ -6,10 +6,7 @@ import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryChatAnswerRequest;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryChatResponse;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
-import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
-import com.odorok.OdorokApplication.diary.dto.response.VisitedCourseWithoutDiaryResponse;
+import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
 import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -33,11 +30,26 @@ import static com.odorok.OdorokApplication.commons.response.CommonResponseBuilde
 public class DiaryController {
 
     private final DiaryService diaryService;
+    private final String DIARY_LIST_GROUPING_BY = "year";
+
+    @GetMapping()
+    public ResponseEntity<?> searchAllDiaryByUserId(@RequestParam(required = false) String groupBy, @AuthenticationPrincipal CustomUserDetails user) {
+        //        long userId = user.getUser().getId();
+        long userId = 1L; // 테스트용
+        ResponseRoot<?> response;
+        if(groupBy != null && groupBy.equals(DIARY_LIST_GROUPING_BY)) {
+            // 연도 기준으로 리스트 리턴
+            Map<String, List<DiarySummary>> diaryListGroupByYear = diaryService.findAllDiaryGroupByYear(userId);
+            response = success("연도별 일지 목록 조회 성공", diaryListGroupByYear);
+        } else {
+            List<DiarySummary> diaryList = diaryService.findAllDiaryByUser(userId);
+            response = success("일지 목록 조회 성공", diaryList);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
     @GetMapping("/{diaryId}")
-    public ResponseEntity<?> searchDiaryById(@PathVariable long diaryId
-            , @AuthenticationPrincipal CustomUserDetails user
-    ) {
+    public ResponseEntity<?> searchDiaryById(@PathVariable long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
 //        long userId = user.getUser().getId();
         long userId = 1L; // 테스트용
         DiaryDetail diary = diaryService.findDiaryById(userId, diaryId);

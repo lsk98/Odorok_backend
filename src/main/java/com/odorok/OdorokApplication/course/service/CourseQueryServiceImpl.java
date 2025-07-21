@@ -84,6 +84,16 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         return queryCoursesForDiseaseOfBrutal(userId, criteria, pageable);
     }
 
+    @Override
+    public Set<Integer> queryValidSidoCodes() {
+        return courseRepository.findDistinctValidSidoCodes();
+    }
+
+    @Override
+    public boolean checkSidoCodeValidation(Integer sidoCode) {
+        return this.queryValidSidoCodes().contains(sidoCode);
+    }
+
     public List<DiseaseAndCourses> queryCoursesForDiseasesOfView(Long userId, RecommendationCriteria criteria, Pageable pageable) {
         List<DiseaseAndCourses> result = new ArrayList<>();
 

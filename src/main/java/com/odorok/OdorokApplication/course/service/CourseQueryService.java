@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public interface CourseQueryService {
     List<CourseSummary> queryCoursesByRegion(Integer sidoCode, Integer sigunguCode, Long userId, Pageable pageable);
@@ -19,6 +20,8 @@ public interface CourseQueryService {
     CourseDetail queryCourseDetail(Long courseId);
     List<RecommendedCourseSummary> queryTopRatedCourses(RecommendationCriteria criteria);
     List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria, Pageable pageable);
+    Set<Integer> queryValidSidoCodes();
+    boolean checkSidoCodeValidation(Integer sidoCode);
 
     enum RecommendationCriteria {
         STARS((a, b) -> b.getAvgStars().compareTo(a.getAvgStars())),

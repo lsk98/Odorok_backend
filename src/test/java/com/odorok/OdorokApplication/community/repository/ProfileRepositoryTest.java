@@ -1,9 +1,7 @@
-package com.odorok.OdorokApplication.course.repository;
+package com.odorok.OdorokApplication.community.repository;
 
 import com.odorok.OdorokApplication.commons.querydsl.config.QueryDslConfig;
-import com.odorok.OdorokApplication.community.repository.ProfileRepository;
 import com.odorok.OdorokApplication.draftDomain.Profile;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

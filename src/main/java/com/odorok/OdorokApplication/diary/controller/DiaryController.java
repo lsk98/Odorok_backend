@@ -114,8 +114,8 @@ public class DiaryController {
     ) {
 //        long userId = user.getUser().getId();
         long userId = 1L; // 테스트용
-        VisitedCourseWithoutDiaryResponse response = diaryService.findVisitedCourseWithoutDiaryByUserId(userId);
-
+        VisitedCourseWithoutDiaryResponse visitedCourseList = diaryService.findVisitedCourseWithoutDiaryByUserId(userId);
+        ResponseRoot<VisitedCourseWithoutDiaryResponse> response = success("일지 생성 안 된 방문 완료 코스 조회 성공", visitedCourseList);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

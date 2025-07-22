@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.community.controller;
 
+import com.odorok.OdorokApplication.commons.aop.annotation.CheckCommentOwner;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.community.dto.request.CommentUpdateRequest;
@@ -18,7 +19,7 @@ public class CommentApiController {
     private final CommentService commentService;
 
     @PutMapping("/{comment-id}")
-    //@PreAuthorize("@commentPermissionEvaluator.isOwner(#commentId)")
+    @CheckCommentOwner(commentId = "commentId")
     public ResponseEntity<ResponseRoot<Void>> updateComment(@PathVariable("comment-id") Long commentId,
                                                             @RequestBody CommentUpdateRequest request
     ){
@@ -27,7 +28,7 @@ public class CommentApiController {
     }
 
     @DeleteMapping("/{comment-id}")
-    //@PreAuthorize("@commentPermissionEvaluator.isOwner(#commentId)")
+    @CheckCommentOwner(commentId = "commentId")
     public ResponseEntity<ResponseRoot<Void>> deleteComment(@PathVariable("comment-id") Long commentId
     ){
         commentService.deleteComment(commentId);

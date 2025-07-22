@@ -25,7 +25,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -49,6 +53,8 @@ public class DiaryServiceImpl implements DiaryService{
     @Value("${gpt.default-feedback-prompt}")
     private String defaultFeedbackPrompt;
 
+    @Value("${gpt.generation-finalize-diary-prompt}")
+    private String generationFinalizeDiaryPrompt;
     // 일지 생성권 itemId 캐싱.
     @PostConstruct
     public void initDiaryItemId() {
@@ -57,6 +63,23 @@ public class DiaryServiceImpl implements DiaryService{
                 .orElseThrow(() ->
                         new IllegalStateException("'일지 생성권' 아이템이 DB에 없습니다. 서버 실행 중단. 데이터 삽입을 확인하세요.")
                 );
+    }
+
+    @Override
+    public List<DiarySummary> findAllDiaryByUser(long userId) {
+        return diaryRepository.findDiaryByUserId(userId);
+    }
+
+    @Override
+    public Map<String, List<DiarySummary>> findAllDiaryGroupByYear(long userId) {
+        List<DiarySummary> diaryList = diaryRepository.findDiaryByUserId(userId);
+        return diaryList.stream()
+                .sorted(Comparator.comparing(DiarySummary::getCreatedAt).reversed())
+                        .collect(Collectors.groupingBy(
+                                diary -> String.valueOf(diary.getCreatedAt().getYear()),
+                                LinkedHashMap::new,
+                                Collectors.toList()
+                        ));
     }
 
     @Override
@@ -172,16 +195,15 @@ public class DiaryServiceImpl implements DiaryService{
     @Override
     @Transactional
     public Long insertFinalizeDiary(long userId, DiaryRequest diaryRequest, List<MultipartFile> images) {
-        List<String> imageUrls = null;
+        // s3에 이미지 등록
+        List<String> imageUrls = diaryImageService.insertDiaryImage(images, userId);
         try {
-            // s3에 이미지 등록
-            imageUrls = diaryImageService.insertDiaryImage(images, userId);
-
+            String finalDiaryContent = getFinalizeContentWithMarkup(diaryRequest.getContent());
             // 일지 title, content 등록
             Diary diary = Diary.builder()
                     .title(diaryRequest.getTitle())
-                    .content(diaryRequest.getContent())
                     .vcourseId(diaryRequest.getVcourseId())
+                    .content(finalDiaryContent)
                     .userId(userId)
                     .build();
             Diary savedDiary = diaryRepository.save(diary);
@@ -195,5 +217,22 @@ public class DiaryServiceImpl implements DiaryService{
             log.error("일지 DB 등록 중 예외 발생 - 이미지 정리 후 예외 전파", e);
             throw e;
         }
+    }
+
+    public String getFinalizeContentWithMarkup(String content) {
+        String requestDiary = PromptTemplate.of(generationFinalizeDiaryPrompt)
+                .with("diaryContent", content)
+                .build();
+        log.debug("최종 일지 내용을 markup으로 수정하기 위한 요청 프롬프트: {} ", requestDiary);
+        GptService.Prompt prompt = GptService.Prompt.builder()
+                .role("user")
+                .content(requestDiary)
+                .build();
+        List<GptService.Prompt> chatLog = gptService.sendPrompt(null, prompt);
+        if (chatLog.isEmpty()) {
+            log.warn("최종 일지 요청 후 GPT 응답이 비어 있음. prompt: {}", prompt);
+            throw new GptCommunicationException("GPT 응답이 비어있음 ");
+        }
+        return chatLog.get(chatLog.size() - 1).getContent();
     }
 }

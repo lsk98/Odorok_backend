@@ -19,7 +19,6 @@ public class CommentApiController {
     private final CommentService commentService;
 
     @PutMapping("/{comment-id}")
-    @CheckCommentOwner(commentId = "commentId")
     public ResponseEntity<ResponseRoot<Void>> updateComment(@PathVariable("comment-id") Long commentId,
                                                             @RequestBody CommentUpdateRequest request
     ){
@@ -28,7 +27,6 @@ public class CommentApiController {
     }
 
     @DeleteMapping("/{comment-id}")
-    @CheckCommentOwner(commentId = "commentId")
     public ResponseEntity<ResponseRoot<Void>> deleteComment(@PathVariable("comment-id") Long commentId
     ){
         commentService.deleteComment(commentId);

@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.community.service;
 
+import com.odorok.OdorokApplication.commons.aop.annotation.CheckArticleOwner;
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
@@ -56,11 +57,13 @@ public class ArticleServiceImpl implements ArticleService{
     }
 
     @Override
+    @CheckArticleOwner(articleId = "articleId")
     public void deleteArticle(Long articleId) {
         articleRepository.deleteById(articleId);
     }
 
     @Override
+    @CheckArticleOwner(articleId = "articleId")
     public void updateArticle(ArticleUpdateRequest request, List<MultipartFile> images,Long articleId,Long userId) {
         //s3에 이미지 삽입
         List<String> newUrlList = articleImageService.insertArticleImages(userId,images);

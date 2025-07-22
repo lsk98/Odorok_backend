@@ -14,6 +14,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class OwnershipAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         //메서드 변수 이름
         String[] paramNames = signature.getParameterNames();
+        System.out.println(Arrays.toString(signature.getParameterNames()));
         //메서드 변수 값
         Object[] args = joinPoint.getArgs();
 

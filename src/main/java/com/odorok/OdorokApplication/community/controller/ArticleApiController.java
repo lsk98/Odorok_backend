@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.community.controller;
 
+import com.odorok.OdorokApplication.commons.aop.annotation.CheckArticleOwner;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
@@ -50,15 +51,13 @@ public class ArticleApiController {
     }
 
     @DeleteMapping("/{articles-id}")
-    //@PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
     public ResponseEntity<ResponseRoot<Void>> deleteArticle(@PathVariable("articles-id") Long articleId) {
         articleService.deleteArticle(articleId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 삭제되었습니다."));
     }
 
     @PutMapping("/{articles-id}")
-    //@PreAuthorize("@articlePermissionEvaluator.isOwner(#articleId)")
-    public ResponseEntity<ResponseRoot<Void>> updateArticle(@RequestPart("data") ArticleUpdateRequest request,
+    public ResponseEntity<ResponseRoot<Void>> updateArticle(@RequestPart(name = "data") ArticleUpdateRequest request,
                                                             @RequestPart(name = "images") List<MultipartFile> images,
                                                             @PathVariable("articles-id") Long articleId,
                                                             @AuthenticationPrincipal CustomUserDetails user

@@ -78,7 +78,9 @@ sourceSets {
 		}
 	}
 }
-
+tasks.withType(JavaCompile) {
+	options.compilerArgs << "-parameters"
+}
 clean {
 	delete generated
 }

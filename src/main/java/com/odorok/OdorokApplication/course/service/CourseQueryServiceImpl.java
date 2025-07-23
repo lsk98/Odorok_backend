@@ -80,19 +80,32 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     }
 
     @Override
-    public List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria) {
+    public List<DiseaseAndCourses> queryCoursesForDiseasesOf(Long userId, RecommendationCriteria criteria, Pageable pageable) {
+        return queryCoursesForDiseaseOfBrutal(userId, criteria, pageable);
+    }
+
+    @Override
+    public Set<Integer> queryValidSidoCodes() {
+        return courseRepository.findDistinctValidSidoCodes();
+    }
+
+    @Override
+    public boolean checkSidoCodeValidation(Integer sidoCode) {
+        return this.queryValidSidoCodes().contains(sidoCode);
+    }
+
+    public List<DiseaseAndCourses> queryCoursesForDiseasesOfView(Long userId, RecommendationCriteria criteria, Pageable pageable) {
         List<DiseaseAndCourses> result = new ArrayList<>();
 
         List<UserDisease> diseases = userDiseaseQueryService.queryUserDiseases(userId);
-        for(UserDisease disease : diseases) {
-            result.add(this.queryCoursesForDisease(disease.getDiseaseId(), criteria));
+        for (UserDisease disease : diseases) {
+            result.add(this.queryCoursesOfDisease(disease.getDiseaseId(), criteria, pageable));
         }
 
         return result;
     }
 
-    @Override
-    public DiseaseAndCourses queryCoursesForDisease(Long diseaseId, RecommendationCriteria criteria) {
+    public DiseaseAndCourses queryCoursesOfDisease(Long diseaseId, RecommendationCriteria criteria, Pageable pageable) {
         List<DiseaseCourseStat> stats = diseaseCourseStatQueryService.queryDiseaseCourseStatFor(diseaseId);
         if(stats.isEmpty()) return null;
 
@@ -102,7 +115,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         result.setDiseaseCode(diseaseId);
 
         List<RecommendedCourseSummary> courses = new ArrayList<>();
-        for(int i = 0; i < Math.min(5, stats.size()); i++) {
+        for(int i = 0; i < Math.min(pageable.getPageSize(), stats.size()); i++) {
             courses.add(new RecommendedCourseSummary(
                     courseRepository.findById(stats.get(i).getCourseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코스 아이디로 조회를 시도했습니다.")),
                     (int)Math.round(stats.get(i).getAvgStars()),
@@ -116,9 +129,8 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         return result;
     }
 
-    // 테스트를 위한 비효율 방식
-    @Override
-    public List<DiseaseAndCourses> queryCoursesForDiseaseOfBrutal(Long userId, RecommendationCriteria criteria) {
+
+    public List<DiseaseAndCourses> queryCoursesForDiseaseOfBrutal(Long userId, RecommendationCriteria criteria, Pageable pageable) {
         List<DiseaseAndCourses> result = new ArrayList<>();
         // 유저와 같은 질병을 가진 사람들의 아이디를 모아본다.
         // 사용자의 질병 코드를 읽어옴
@@ -130,20 +142,19 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         // 사용자와 같은 질병 코드를 가진 userID를 검색함.
         for(Long diseaseId : userDisease) { // 질병 하나당 한 번씩 수행함.
             Set<Long> sameDiseaseUsers = new HashSet<>();
-            sameDiseaseUsers.add(userId);
 
             sameDiseaseUsers.addAll(userDiseaseQueryService.queryUsersHavingDisease(diseaseId)
                     .stream().map(UserDisease::getUserId).toList());
 
             // 현재 질병 id를 가진 사람들의 방문 코스 정보 모으기
-            List<VisitedCourse> vcourses = visitedCourseQueryService.queryVisitedCourses(userId);
-            for(Long sampledId : sameDiseaseUsers) {
-                vcourses.addAll(visitedCourseQueryService.queryVisitedCourses(sampledId));
+            List<VisitedCourse> visitedCourses = new ArrayList<>();
+            for(Long sameDiseaseUserId : sameDiseaseUsers) {
+                visitedCourses.addAll(visitedCourseQueryService.queryVisitedCourses(sameDiseaseUserId));
             }
 
             // 통계정보를 저장해야 하니까..
             Map<Long, List<VisitedCourse>> mapForCourses = new HashMap<>();
-            for(VisitedCourse course : vcourses) {
+            for(VisitedCourse course : visitedCourses) {
                 Long courseId = course.getCourseId();
                 if(!mapForCourses.containsKey(courseId)) {
                     mapForCourses.put(courseId, new ArrayList<>());
@@ -156,7 +167,8 @@ public class CourseQueryServiceImpl implements CourseQueryService{
             for(Long courseId : mapForCourses.keySet()) {
                 List<VisitedCourse> list = mapForCourses.get(courseId);
                 Double avg = list.stream().collect(Collectors.averagingDouble(VisitedCourse::getStars));
-                CourseTempStat stat = new CourseTempStat(courseId, avg);
+                Integer reviewCount = (int)list.stream().filter(r -> r.getReview() != null && !r.getReview().equals("")).count();
+                CourseTempStat stat = new CourseTempStat(courseId, avg, reviewCount, (long)list.size());
                 courseRanking.add(stat);
             }
 
@@ -166,18 +178,20 @@ public class CourseQueryServiceImpl implements CourseQueryService{
             DiseaseAndCourses summary = new DiseaseAndCourses();
             summary.setDiseaseCode(diseaseId);
             summary.setCourses(new ArrayList<RecommendedCourseSummary>());
-            for(int i = 0; i < Math.min(5, courseRanking.size()); i++) {
-                summary.getCourses().add(
-                        new RecommendedCourseSummary(
-                                courseRepository.findById(courseRanking.get(i).courseId())
-                                        .orElseThrow(() -> new IllegalArgumentException("지병 별 코스 추천(자바로 처리) : 해당 코스가 없습니다.")),
-                                (int)Math.round(courseRanking.get(i).avgStars()), 0, 0L
-                        )
+            for(int i = 0; i < Math.min(pageable.getPageSize(), courseRanking.size()); i++) {
+                Course course = courseRepository.findById(courseRanking.get(i).courseId())
+                        .orElseThrow(() -> new IllegalArgumentException("지병 별 코스 추천(자바로 처리) : 해당 코스가 없습니다."));
+                RecommendedCourseSummary courseSummary =new RecommendedCourseSummary(
+                        course,
+                        (int)Math.round(courseRanking.get(i).avgStars()), courseRanking.get(i).reviewCount, courseRanking.get(i).visitationCount
                 );
+                courseSummary.setGilName(routeQueryService.queryRouteNameByRouteIdx(course.getRouteIdx()));
+                courseSummary.setVisited(visitedCourseQueryService.checkVisitedCourse(userId, course.getId()));
+                summary.getCourses().add(courseSummary);
             }
             result.add(summary);
         }
         return result;
     }
-    record CourseTempStat(Long courseId, Double avgStars) {};
+    record CourseTempStat(Long courseId, Double avgStars, Integer reviewCount, Long visitationCount) {};
 }

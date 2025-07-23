@@ -59,7 +59,6 @@ public class Article {
     @Column(name = "disease_id")
     private Integer diseaseId;
 
-    //임시 생성자 테스트 끝나면 삭제해야함
     public Article(String title, int likeCount, int viewCount, int commentCount,
                    int boardType, boolean notice, Long userId) {
         this.title = title;

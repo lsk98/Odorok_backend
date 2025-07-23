@@ -1,12 +1,11 @@
 package com.odorok.OdorokApplication.course.controller;
 
-import com.odorok.OdorokApplication.course.dto.response.item.Coord;
-import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
-import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
-import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
-import com.odorok.OdorokApplication.course.service.CourseQueryService;
+import com.odorok.OdorokApplication.course.dto.response.item.*;
+import com.odorok.OdorokApplication.course.service.*;
+import com.odorok.OdorokApplication.domain.ScheduledCourse;
+import com.odorok.OdorokApplication.domain.User;
+import com.odorok.OdorokApplication.draftDomain.Profile;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
-import com.odorok.OdorokApplication.security.domain.User;
 import com.odorok.OdorokApplication.security.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,10 +20,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,18 +44,26 @@ class CourseApiControllerTest {
     private CourseQueryService courseQueryService;
     @MockitoBean
     private UserService userService;
+    @MockitoBean
+    private ProfileQueryService profileQueryService;
+    @MockitoBean
+    private CourseScheduleManageService courseScheduleManageService;
+    @MockitoBean
+    private CourseScheduleQueryService courseScheduleQueryService;
 
     private final static Long TEST_USER_ID = 1L;
     private final static String TEST_USER_EMAIL = "email";
     private final static Long TEST_COURSE_ID = 1L;
+    private final static Integer TEST_SIDO_CODE = 1;
+    private final static Integer TEST_SIGUNGU_CODE = 1;
 
 
     @Test
     public void 가입된_사용자가_지역_코드로_코스_조회에_성공한다() throws Exception {
         // given
-        int sidoCode = 1, sigunguCode = 1;
-        Mockito.when(userService.selectByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
-        Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.eq(sidoCode), Mockito.eq(sigunguCode), Mockito.eq(1L), Mockito.any())).thenReturn(List.of(
+        Mockito.when(courseQueryService.checkSidoCodeValidation(TEST_SIDO_CODE)).thenReturn(true);
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.any(), Mockito.eq(TEST_SIGUNGU_CODE), Mockito.eq(1L), Mockito.any())).thenReturn(List.of(
                 CourseSummary.builder()
                         .courseId(1l).courseName("코스1").gilName("GIL001")
                         .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build(),
@@ -65,17 +74,43 @@ class CourseApiControllerTest {
 
         // when
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/region")
-                        .param("sidoCode", "1")
-                        .param("sigunguCode", "1")
+                        .param("sidoCode", TEST_SIDO_CODE.toString())
+                        .param("sigunguCode", TEST_SIGUNGU_CODE.toString())
                         .param("email", TEST_USER_EMAIL).param("page", "0").param("size", "10").accept(MediaType.APPLICATION_JSON));
 
         // then
-        result.andExpect(status().isOk()).andDo(MockMvcResultHandlers.print()).andExpect(jsonPath("$.data.items[0].courseId").value(1l));
+        result.andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.items[0].courseId").value(1l));
+    }
+
+    @Test
+    public void 가입된_사용자가_지역_코드로_코스_조회에_실패한다() throws Exception {
+        // given
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.eq(TEST_SIDO_CODE), Mockito.eq(TEST_SIGUNGU_CODE), Mockito.eq(1L), Mockito.any())).thenReturn(List.of(
+                CourseSummary.builder()
+                        .courseId(1l).courseName("코스1").gilName("GIL001")
+                        .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build(),
+                CourseSummary.builder()
+                        .courseId(2l).courseName("코스2").gilName("GIL002")
+                        .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build()
+        ));
+
+        // when
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/region")
+                .param("sidoCode", "1")
+                .param("sigunguCode", "1")
+                .param("email", TEST_USER_EMAIL).param("page", "0").param("size", "10").accept(MediaType.APPLICATION_JSON));
+
+        // then
+        result.andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
     @Test
     public void 전체코스_조회에_성공한다() throws Exception{
-        Mockito.when(userService.selectByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryAllCourses(Mockito.eq(TEST_USER_ID), Mockito.any(Pageable.class))).thenReturn(List.of(
                         CourseSummary.builder()
                                 .courseId(1l).courseName("코스1").gilName("GIL001")
@@ -126,8 +161,68 @@ class CourseApiControllerTest {
         resultActions.andExpect(jsonPath("$.data.topStars").isNotEmpty());
         resultActions.andExpect(jsonPath("$.data.topVisited").isNotEmpty());
         resultActions.andExpect(jsonPath("$.data.topReviewCount").isNotEmpty());
-        resultActions.andDo(MockMvcResultHandlers.print());
+        resultActions.andDo(print());
 
         Mockito.verify(courseQueryService, Mockito.times(3)).queryTopRatedCourses(Mockito.any(CourseQueryService.RecommendationCriteria.class));
+    }
+
+    @Test
+    public void 질병_코스_조회에_성공한다() throws Exception {
+        Mockito.when(userService.queryByEmail("email")).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(courseQueryService.queryCoursesForDiseasesOf(Mockito.eq(TEST_USER_ID), Mockito.any(), Mockito.any(Pageable.class)))
+                .thenReturn(List.of(
+                        new DiseaseAndCourses(1L, List.of()),
+                        new DiseaseAndCourses(3L, List.of()),
+                        new DiseaseAndCourses(5L, List.of())
+                ));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/disease")
+                .param("email", "email"));
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.items").isNotEmpty());
+        resultActions.andDo(print());
+
+        Mockito.verify(courseQueryService, Mockito.times(1)).queryCoursesForDiseasesOf(Mockito.eq(TEST_USER_ID), Mockito.any(), Mockito.any(Pageable.class));
+    }
+
+    @Test
+    public void 사용자_지역의_코스를_조회하는데_성공한다() throws Exception {
+        Mockito.when(userService.queryByEmail("email")).thenReturn(User.builder().id(TEST_USER_ID).build());
+        Mockito.when(courseQueryService.checkSidoCodeValidation(TEST_SIDO_CODE)).thenReturn(true);
+        Mockito.when(profileQueryService.queryProfileByUserId(Mockito.eq(TEST_USER_ID)))
+                .thenReturn(Profile.builder().sidoCode(TEST_SIDO_CODE).sigunguCode(TEST_SIGUNGU_CODE).userId(TEST_USER_ID).build());
+        Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.eq(TEST_SIDO_CODE), Mockito.eq(TEST_SIGUNGU_CODE), Mockito.eq(TEST_USER_ID), Mockito.any(Pageable.class)))
+                .thenReturn(List.of(
+                        CourseSummary.builder()
+                                .courseId(1l).courseName("코스1").gilName("GIL001")
+                                .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build(),
+                        CourseSummary.builder()
+                                .courseId(2l).courseName("코스2").gilName("GIL002")
+                                .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build()
+                ));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/user-region")
+                .param("email", "email"));
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(jsonPath("$.data.items").isNotEmpty());
+
+        Mockito.verify(profileQueryService, Mockito.atLeastOnce()).queryProfileByUserId(Mockito.eq(TEST_USER_ID));
+    }
+
+
+    @Test
+    public void 사용자의_방문예정_조회에_성공한다() throws Exception {
+        Mockito.when(userService.queryByEmail("email")).thenReturn(User.builder().email("email").id(TEST_USER_ID).build());
+        Mockito.when(courseScheduleQueryService.queryAllSchedule(TEST_USER_ID)).thenReturn(List.of(
+                VisitationScheduleSummary.builder().courseName("TEST1").build(),
+                VisitationScheduleSummary.builder().courseName("TEST2").build()
+        ));
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/schedule").param("email", "email"));
+
+        resultActions.andExpect(status().isOk());
+        resultActions.andDo(print());
+        resultActions.andExpect(jsonPath("$.data.schedule").isNotEmpty());
     }
 }

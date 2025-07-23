@@ -5,6 +5,8 @@ import com.odorok.OdorokApplication.commons.exception.GptCommunicationException;
 import com.odorok.OdorokApplication.commons.exception.NotFoundException;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.commons.exception.FileUploadException;
+import com.odorok.OdorokApplication.course.exception.ScheduledDateOverlappingException;
+import com.odorok.OdorokApplication.region.exception.InvalidSidoCodeException;
 import jakarta.persistence.Access;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -110,5 +112,19 @@ public class GlobalExceptionHandler {
         log.error("예상치 못한 예외 - {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(fail("알 수 없는 오류가 발생했습니다."));
+    }
+
+    @ExceptionHandler(InvalidSidoCodeException.class)
+    public ResponseEntity<ResponseRoot<Void>> handleInvalidSidoCode(InvalidSidoCodeException e) {
+        log.error("시도코드 에러 - {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(fail(e.getMessage()));
+    }
+
+    @ExceptionHandler(ScheduledDateOverlappingException.class)
+    public ResponseEntity<ResponseRoot<Void>> handleOverlappedSchedule(ScheduledDateOverlappingException e) {
+        log.error("중복 방문 코스 예정 에러 - {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(fail(e.getMessage()));
     }
 }

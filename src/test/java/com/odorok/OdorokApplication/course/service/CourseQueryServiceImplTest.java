@@ -1,11 +1,10 @@
 package com.odorok.OdorokApplication.course.service;
 
 import com.odorok.OdorokApplication.course.dto.process.CourseStat;
-import com.odorok.OdorokApplication.course.dto.response.item.Coord;
-import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
-import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
-import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
+import com.odorok.OdorokApplication.course.dto.response.item.*;
 import com.odorok.OdorokApplication.course.repository.CourseRepository;
+import com.odorok.OdorokApplication.domain.UserDisease;
+import com.odorok.OdorokApplication.domain.VisitedCourse;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import com.odorok.OdorokApplication.infrastructures.domain.PathCoord;
 import org.junit.jupiter.api.Test;
@@ -38,6 +37,11 @@ class CourseQueryServiceImplTest {
     private PathCoordQueryService pathCoordQueryService;
 
     @Mock
+    private DiseaseCourseStatQueryService diseaseCourseStatQueryService;
+    @Mock
+    private UserDiseaseQueryService userDiseaseQueryService;
+
+    @Mock
     private Page<Course> mockPage;
 
     @InjectMocks
@@ -45,6 +49,9 @@ class CourseQueryServiceImplTest {
 
     private final static Long TEST_USER_ID = 1L;
     private final static Long TEST_COURSE_ID = 1L;
+
+    private final static Long TEST_USER_2 = 2L;
+    private final static Long TEST_USER_3 = 3L;
 
     @Test
     public void 시군구_코드로_코스_조회에_성공한다() {
@@ -139,5 +146,34 @@ class CourseQueryServiceImplTest {
 
         System.out.println(summaries);
         assertThat(summaries.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void 질병별_코스_조회에_성공한다() {
+        Mockito.when(userDiseaseQueryService.queryUserDiseases(TEST_USER_ID)).thenReturn(List.of(
+                UserDisease.builder().userId(TEST_USER_ID).diseaseId(1L).build(),
+                UserDisease.builder().userId(TEST_USER_ID).diseaseId(2L).build(),
+                UserDisease.builder().userId(TEST_USER_ID).diseaseId(3L).build())
+        );
+        Mockito.when(userDiseaseQueryService.queryUsersHavingDisease(Mockito.anyLong())).thenReturn(List.of(
+                UserDisease.builder().userId(TEST_USER_2).diseaseId(0l).build(),
+                UserDisease.builder().userId(TEST_USER_3).diseaseId(0l).build())
+        );
+        Mockito.when(visitedCourseQueryService.queryVisitedCourses(Mockito.anyLong())).thenReturn(List.of(
+                new VisitedCourse(1L, TEST_COURSE_ID, LocalDateTime.now(), TEST_USER_ID, null, null, null, 1, 1.0, "", false),
+                new VisitedCourse(2L, TEST_COURSE_ID + 1, LocalDateTime.now(), TEST_USER_ID, null, null, null, 2, 1.0, "", true),
+                new VisitedCourse(3L, TEST_COURSE_ID + 2, LocalDateTime.now(), TEST_USER_ID, null, null, null, 3, 1.0, "", false),
+                new VisitedCourse(4L, TEST_COURSE_ID + 3, LocalDateTime.now(), TEST_USER_ID, null, null, null, 4, 1.0, "", true),
+                new VisitedCourse(5L, TEST_COURSE_ID + 4, LocalDateTime.now(), TEST_USER_ID, null, null, null, 5, 1.0, "", true)
+        ));
+        Mockito.when(courseRepository.findById(Mockito.any())).thenReturn(Optional.of(Course.builder().id(TEST_COURSE_ID).routeIdx("test001").build()));
+        Mockito.when(routeQueryService.queryRouteNameByRouteIdx(Mockito.any())).thenReturn("test route name");
+        Mockito.when(visitedCourseQueryService.checkVisitedCourse(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Mockito.eq(true));
+
+        List<DiseaseAndCourses> res = courseQueryService.queryCoursesForDiseasesOf(TEST_USER_ID, CourseQueryService.RecommendationCriteria.STARS, Pageable.ofSize(10));
+        assertThat(res).isNotEmpty();
+        Mockito.verify(userDiseaseQueryService, Mockito.times(1)).queryUserDiseases(TEST_USER_ID);
+        Mockito.verify(userDiseaseQueryService, Mockito.times(3)).queryUsersHavingDisease(Mockito.anyLong());
+        Mockito.verify(visitedCourseQueryService, Mockito.atLeastOnce()).queryVisitedCourses(Mockito.anyLong());
     }
 }

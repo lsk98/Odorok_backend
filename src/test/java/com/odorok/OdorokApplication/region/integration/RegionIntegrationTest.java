@@ -40,12 +40,21 @@ public class RegionIntegrationTest {
     @Test
     public void 시군구코드_조회에_성공한다() {
         String url = UriComponentsBuilder.fromUriString("http://localhost").port(LOCAL_PORT).path("/api/regions/sigungu")
-                .queryParam("sidoCode", 1)
+                .queryParam("sidoCode", 6)
                 .build().toUriString();
         ResponseRoot root = restTemplate.getForObject(url, ResponseRoot.class);
         List<SigunguSummary> sigungus = (List<SigunguSummary>)(((LinkedHashMap)root.getData()).get("items"));
 
         assertThat(sigungus).isNotNull();
         assertThat(sigungus.size()).isNotZero();
+    }
+
+    @Test
+    public void 시군구코드_조회에_실패한다() {
+        String url = UriComponentsBuilder.fromUriString("http://localhost").port(LOCAL_PORT).path("/api/regions/sigungu")
+                .queryParam("sidoCode", 1)
+                .build().toUriString();
+        ResponseRoot root = restTemplate.getForObject(url, ResponseRoot.class);
+        assertThat(root.getData()).isNull();
     }
 }

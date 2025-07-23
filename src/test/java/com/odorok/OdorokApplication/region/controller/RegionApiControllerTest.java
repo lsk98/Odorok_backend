@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.region.controller;
 
+import com.odorok.OdorokApplication.course.service.CourseQueryService;
 import com.odorok.OdorokApplication.region.dto.response.item.SidoSummary;
 import com.odorok.OdorokApplication.region.dto.response.item.SigunguSummary;
 import com.odorok.OdorokApplication.region.service.RegionQueryService;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -29,8 +31,8 @@ class RegionApiControllerTest {
     private final String SIDO_PATH = "/sido";
     private final String SIGUNGU_PATH = "/sigungu";
 
-    private final int SEOUL_SIDO_CODE = 1;
-
+    private static final int SEOUL_SIDO_CODE = 1;
+    private static final int BUSAN_SIDO_CODE = 6;
 //    @MockitoBean
 //    private JWTAuthenticationFilter jwtAuthenticationFilter;
 //    @MockitoBean
@@ -38,6 +40,8 @@ class RegionApiControllerTest {
 
     @MockitoBean
     private RegionQueryService regionQueryService;
+    @MockitoBean
+    private CourseQueryService courseQueryService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,15 +51,35 @@ class RegionApiControllerTest {
         String url = UriComponentsBuilder.fromUriString(URI)
                 .port(LOCAL_PORT)
                 .path(COMMON_REQUEST_PATH+SIDO_PATH).toUriString();
-
+        Mockito.when(courseQueryService.queryValidSidoCodes()).thenReturn(Set.of(BUSAN_SIDO_CODE));
         Mockito.when(regionQueryService.queryAllSidos()).thenReturn(List.of(
-                new SidoSummary("서울특별시", 1), new SidoSummary("부산광역시", 6)
+                new SidoSummary("서울특별시", SEOUL_SIDO_CODE), new SidoSummary("부산광역시", BUSAN_SIDO_CODE)
         ));
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(url));
         resultActions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.items[0].sidoCode").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.items[0].sidoCode").value(BUSAN_SIDO_CODE))
                 .andDo(print());
+    }
+
+    @Test
+    public void 특정시도_행정동_조회에_실패한다() throws Exception {
+        String url = UriComponentsBuilder.fromUriString(URI)
+                .port(LOCAL_PORT)
+                .path(COMMON_REQUEST_PATH+SIGUNGU_PATH)
+                .queryParam("sidoCode", SEOUL_SIDO_CODE)
+                .toUriString();
+        
+        Mockito.when(courseQueryService.queryValidSidoCodes()).thenReturn(Set.of(BUSAN_SIDO_CODE));
+
+        Mockito.when(regionQueryService.queryAllSigunguOf(SEOUL_SIDO_CODE)).thenThrow(new RuntimeException("호출되면 안됨."));
+        
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(url));
+        
+        resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest());
+        resultActions.andDo(MockMvcResultHandlers.print());
+
+        Mockito.verify(regionQueryService, Mockito.never()).queryAllSigunguOf(SEOUL_SIDO_CODE);
     }
 
     @Test
@@ -63,10 +87,12 @@ class RegionApiControllerTest {
         String url = UriComponentsBuilder.fromUriString(URI)
                 .port(LOCAL_PORT)
                 .path(COMMON_REQUEST_PATH+SIGUNGU_PATH)
-                .queryParam("sidoCode", SEOUL_SIDO_CODE)
+                .queryParam("sidoCode", BUSAN_SIDO_CODE)
                 .toUriString();
 
-        Mockito.when(regionQueryService.queryAllSigunguOf(SEOUL_SIDO_CODE)).thenReturn(
+        Mockito.when(courseQueryService.queryValidSidoCodes()).thenReturn(Set.of(BUSAN_SIDO_CODE));
+
+        Mockito.when(regionQueryService.queryAllSigunguOf(BUSAN_SIDO_CODE)).thenReturn(
                 List.of(new SigunguSummary("중구", 1), new SigunguSummary("광진구", 2),
                         new SigunguSummary("노원구", 3), new SigunguSummary("마포구", 4)));
 

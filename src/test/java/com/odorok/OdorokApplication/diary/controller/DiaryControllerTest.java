@@ -1,13 +1,10 @@
 package com.odorok.OdorokApplication.diary.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiarySummary;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -77,9 +74,9 @@ public class DiaryControllerTest {
 
         result.andExpect(jsonPath("$.data['2025'].length()").value(2));
         result.andExpect(jsonPath("$.data['2024'].length()").value(1));
-        result.andExpect(jsonPath("$.data['2024'].id").value(1L));
-        result.andExpect(jsonPath("$.data['2024'].title").value(TestDiaryTitle));
-        result.andExpect(jsonPath("$.data['2024'].createdAt").value("2024-11-11T00:00:00"));GIT
+        result.andExpect(jsonPath("$.data['2024'][0].id").value(1L));
+        result.andExpect(jsonPath("$.data['2024'][0].title").value(TestDiaryTitle));
+        result.andExpect(jsonPath("$.data['2024'][0].createdAt").value("2024-11-11T00:00:00"));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.odorok.OdorokApplication.diary.repository;
 
 import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
+import com.odorok.OdorokApplication.diary.dto.response.DiarySummary;
 import com.odorok.OdorokApplication.domain.QDiary;
 import com.odorok.OdorokApplication.domain.QDiaryImage;
 import com.odorok.OdorokApplication.domain.QVisitedCourse;
@@ -51,5 +52,23 @@ public class DiaryRepositoryImpl implements DiaryRepositoryCustom{
                 .fetch();
         diaryDetail.setImgs(imgs);
         return diaryDetail;
+    }
+
+    @Override
+    public List<DiarySummary> findDiaryByUserId(long userId) {
+        List<DiarySummary> diaryList = queryFactory
+                .select(Projections.constructor(
+                        DiarySummary.class,
+                        diary.id,
+                        diary.title,
+                        diary.createdAt,
+                        visitedCourse.visitedAt
+                ))
+                .from(diary)
+                .leftJoin(visitedCourse).on(diary.vcourseId.eq(visitedCourse.id))
+                .where(diary.userId.eq(userId))
+                .orderBy(diary.createdAt.desc())
+                .fetch();
+        return diaryList;
     }
 }

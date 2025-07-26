@@ -6,7 +6,7 @@ import com.odorok.OdorokApplication.community.service.ArticleService;
 import com.odorok.OdorokApplication.course.repository.UserRepository;
 import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.draftDomain.Article;
-import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
+import com.odorok.OdorokApplication.security.domain.UserStuff;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,10 +49,10 @@ class OwnershipAspectTest {
         articleId = article.getId();
     }
     private void mockSecurityContext(User user) {
-        com.odorok.OdorokApplication.security.domain.User secuUser =
-                new com.odorok.OdorokApplication.security.domain.User(user.getId(),user.getName(),user.getNickname(),user.getEmail()
+        UserStuff secuUserStuff =
+                new UserStuff(user.getId(),user.getName(),user.getNickname(),user.getEmail()
                 ,user.getPassword(),"refresh");
-        CustomUserDetails userDetails = new CustomUserDetails(secuUser);
+        CustomUserDetails userDetails = new CustomUserDetails(secuUserStuff);
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContext context = SecurityContextHolder.createEmptyContext();

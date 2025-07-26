@@ -8,7 +8,6 @@ import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
-import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

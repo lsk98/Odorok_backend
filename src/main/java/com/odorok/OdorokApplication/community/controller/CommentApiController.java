@@ -1,15 +1,11 @@
 package com.odorok.OdorokApplication.community.controller;
 
-import com.odorok.OdorokApplication.commons.aop.annotation.CheckCommentOwner;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
 import com.odorok.OdorokApplication.community.dto.request.CommentUpdateRequest;
 import com.odorok.OdorokApplication.community.service.CommentService;
-import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/comments")

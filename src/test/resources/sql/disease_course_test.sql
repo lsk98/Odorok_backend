@@ -3008,7 +3008,7 @@ insert into health_infos values(null, 3, 1, 182, 75, 31, 0, 2, 2); -- 011001
 insert into health_infos values(null, 4, 0, 164, 51, 33, 1, 2, 2); -- 000100
 insert into health_infos values(null, 5, 0, 162, 53, 21, 0, 2, 2); -- 100000
 
--- dummy user diseases
+-- dummy userStuff diseases
 insert into user_diseases values(null, 1, 2, now());
 insert into user_diseases values(null, 1, 4, now());
 insert into user_diseases values(null, 2, 1, now());

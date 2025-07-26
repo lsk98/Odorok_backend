@@ -11,7 +11,6 @@ import com.odorok.OdorokApplication.diary.dto.response.DiaryDetail;
 import com.odorok.OdorokApplication.diary.dto.response.DiaryPermissionCheckResponse;
 import com.odorok.OdorokApplication.diary.dto.response.VisitedCourseWithoutDiaryResponse;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
-import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,7 @@ public class DiaryController {
 
     @GetMapping("/{diaryId}")
     public ResponseEntity<?> searchDiaryById(@PathVariable long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
-        long userId = user.getUser().getId();
+        long userId = user.getUserStuff().getId();
         DiaryDetail diary = diaryService.findDiaryById(userId, diaryId);
         if(diary == null) {
             throw new NotFoundException("해당 일지를 찾을 수 없습니다.");

@@ -1,5 +1,6 @@
 package com.odorok.OdorokApplication.domain;
 
+import com.odorok.OdorokApplication.security.domain.UserStuff;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,4 +30,13 @@ public class User {
 
     @Column(length = 30)
     private String role;
+
+    public User(UserStuff userStuff) {
+        this.id = userStuff.getId();
+        this.name = userStuff.getName();
+        this.nickname = userStuff.getNickname();
+        this.email = userStuff.getEmail();
+        this.password = userStuff.getPassword();
+        this.role = "ROLE_USER";
+    }
 }

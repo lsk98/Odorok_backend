@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.DiarySummary;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
+import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 public class DiaryControllerTest {
     private final Long TEST_USER_ID = 1L;
+    private final Long TEST_DIARY_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -77,6 +81,22 @@ public class DiaryControllerTest {
         result.andExpect(jsonPath("$.data['2024'][0].id").value(1L));
         result.andExpect(jsonPath("$.data['2024'][0].title").value(TestDiaryTitle));
         result.andExpect(jsonPath("$.data['2024'][0].createdAt").value("2024-11-11T00:00:00"));
+    }
+
+    @Test
+    void 일지_삭제_요청_성공() throws Exception {
+        final String responseMessage = "일지 삭제 성공";
+        // given
+        CustomUserDetails userDetails = mock(CustomUserDetails.class);
+        when(userDetails.getUserId()).thenReturn(TEST_USER_ID);
+        doNothing().when(diaryService).deleteDiaryById(TEST_USER_ID, TEST_DIARY_ID);
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/api/diaries/{diaryId}", TEST_DIARY_ID)
+                .principal(() -> "user")
+                .with(authentication(new UsernamePasswordAuthenticationToken(userDetails, "", List.of()))));
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.message").value(responseMessage));
     }
 
     @Test

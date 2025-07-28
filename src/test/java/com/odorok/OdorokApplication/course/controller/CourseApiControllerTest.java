@@ -1,26 +1,32 @@
 package com.odorok.OdorokApplication.course.controller;
 
 import com.odorok.OdorokApplication.course.dto.response.item.*;
-import com.odorok.OdorokApplication.course.service.*;
-import com.odorok.OdorokApplication.domain.ScheduledCourse;
+import com.odorok.OdorokApplication.course.service.CourseQueryService;
+import com.odorok.OdorokApplication.course.service.CourseScheduleManageService;
+import com.odorok.OdorokApplication.course.service.CourseScheduleQueryService;
+import com.odorok.OdorokApplication.course.service.ProfileQueryService;
 import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.draftDomain.Profile;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
+import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import com.odorok.OdorokApplication.security.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,13 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = { CourseApiController.class })
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 class CourseApiControllerTest {
-//    @MockitoBean
-//    private JWTAuthenticationFilter jwtAuthenticationFilter;
-//    @MockitoBean
-//    private JWTVerificationFilter jwtVerificationFilter;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -54,12 +55,23 @@ class CourseApiControllerTest {
     private final static Long TEST_USER_ID = 1L;
     private final static String TEST_USER_EMAIL = "email";
     private final static Long TEST_COURSE_ID = 1L;
-    private final static Integer TEST_SIDO_CODE = 1;
-    private final static Integer TEST_SIGUNGU_CODE = 1;
+    private final static Integer TEST_SIDO_CODE = 6;
+    private final static Integer TEST_SIGUNGU_CODE = 10;
 
+
+    @BeforeEach
+    public void setup() {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                new CustomUserDetails(
+                        User.builder().email(TEST_USER_EMAIL).id(TEST_USER_ID).role("USER").build()),
+                        null,
+                        List.of(new SimpleGrantedAuthority("USER")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 
     @Test
     public void 가입된_사용자가_지역_코드로_코스_조회에_성공한다() throws Exception {
+        System.out.println("프린서펄 = " + SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         // given
         Mockito.when(courseQueryService.checkSidoCodeValidation(TEST_SIDO_CODE)).thenReturn(true);
         Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
@@ -76,7 +88,7 @@ class CourseApiControllerTest {
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/region")
                         .param("sidoCode", TEST_SIDO_CODE.toString())
                         .param("sigunguCode", TEST_SIGUNGU_CODE.toString())
-                        .param("email", TEST_USER_EMAIL).param("page", "0").param("size", "10").accept(MediaType.APPLICATION_JSON));
+                        .param("page", "0").param("size", "10").accept(MediaType.APPLICATION_JSON));
 
         // then
         result.andExpect(status().isOk())
@@ -90,18 +102,18 @@ class CourseApiControllerTest {
         Mockito.when(userService.queryByEmail(TEST_USER_EMAIL)).thenReturn(User.builder().id(TEST_USER_ID).build());
         Mockito.when(courseQueryService.queryCoursesByRegion(Mockito.eq(TEST_SIDO_CODE), Mockito.eq(TEST_SIGUNGU_CODE), Mockito.eq(1L), Mockito.any())).thenReturn(List.of(
                 CourseSummary.builder()
-                        .courseId(1l).courseName("코스1").gilName("GIL001")
+                        .courseId(1L).courseName("코스1").gilName("GIL001")
                         .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build(),
                 CourseSummary.builder()
                         .courseId(2l).courseName("코스2").gilName("GIL002")
                         .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build()
         ));
-
+        Mockito.when(courseQueryService.checkSidoCodeValidation(TEST_SIDO_CODE)).thenReturn(false);
         // when
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/region")
-                .param("sidoCode", "1")
-                .param("sigunguCode", "1")
-                .param("email", TEST_USER_EMAIL).param("page", "0").param("size", "10").accept(MediaType.APPLICATION_JSON));
+                .param("sidoCode", TEST_SIDO_CODE.toString())
+                .param("sigunguCode", TEST_SIGUNGU_CODE.toString())
+                .param("page", "0").param("size", "10").accept(MediaType.APPLICATION_JSON));
 
         // then
         result.andExpect(status().isBadRequest())
@@ -122,7 +134,7 @@ class CourseApiControllerTest {
 
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses")
-                .param("size", "10").param("page", "0").param("email", TEST_USER_EMAIL));
+                .param("size", "10").param("page", "0"));
 
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.items[0].courseId").value(1L));
@@ -176,8 +188,7 @@ class CourseApiControllerTest {
                         new DiseaseAndCourses(5L, List.of())
                 ));
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/disease")
-                .param("email", "email"));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/disease"));
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.items").isNotEmpty());
         resultActions.andDo(print());
@@ -201,8 +212,7 @@ class CourseApiControllerTest {
                                 .createdAt(LocalDateTime.now().toLocalDate()).modifiedAt(LocalDateTime.now().toLocalDate()).build()
                 ));
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/user-region")
-                .param("email", "email"));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/user-region"));
 
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.data.items").isNotEmpty());
@@ -219,7 +229,7 @@ class CourseApiControllerTest {
                 VisitationScheduleSummary.builder().courseName("TEST2").build()
         ));
 
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/schedule").param("email", "email"));
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/courses/schedule"));
 
         resultActions.andExpect(status().isOk());
         resultActions.andDo(print());

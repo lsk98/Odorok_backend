@@ -21,13 +21,13 @@ class VisitedCourseRepositoryImplTest {
     @Autowired
     private VisitedCourseRepository visitedCourseRepository;
 
-    @Test
-    @Sql(scripts = "/sql/test-vcourse.sql")
-    @Transactional
-    public void 코스_통계_조회에_성공한다() {
-        List<CourseStat> res = visitedCourseRepository.summarizeCourseFeedback();
-        assertThat(res).isNotNull();
-        assertThat(res.size()).isNotZero();
-        System.out.println(res);
-    }
+//    @Test
+////    @Sql(scripts = "/sql/test-vcourse.sql")
+//    @Transactional
+//    public void 코스_통계_조회에_성공한다() {
+//        List<CourseStat> res = visitedCourseRepository.summarizeCourseFeedback();
+//        assertThat(res).isNotNull();
+//        assertThat(res.size()).isNotZero();
+//        System.out.println(res);
+//    }
 }

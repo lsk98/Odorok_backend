@@ -4,7 +4,7 @@ package com.odorok.OdorokApplication.security.filter;
 import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import com.odorok.OdorokApplication.security.jwt.JWTUtil;
-import com.odorok.OdorokApplication.security.repository.UserRepository;
+import com.odorok.OdorokApplication.security.repository.AuthUserRepository;
 import com.odorok.OdorokApplication.security.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,13 +25,14 @@ public class JWTFilter extends OncePerRequestFilter {
     private final Set<String> allowedUri;
 
     private final AuthService authService;
-    private final UserRepository userRepository;
+    private final AuthUserRepository authUserRepository;
 
 
-    public JWTFilter(JWTUtil jwtUtil, Set<String> allowedUri, AuthService authService, UserRepository userRepository) {
+    public JWTFilter(JWTUtil jwtUtil, Set<String> allowedUri, AuthService authService, AuthUserRepository authUserRepository) {
         this.jwtUtil = jwtUtil;
         this.allowedUri = allowedUri;
         this.authService = authService;
+        this.authUserRepository = authUserRepository;
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -71,7 +72,7 @@ public class JWTFilter extends OncePerRequestFilter {
         User user = new User();
         user.setEmail(username);
         user.setRole(role);
-        user.setId(userRepository.findByEmail(username).orElseThrow().getId());
+        user.setId(authUserRepository.findByEmail(username).orElseThrow().getId());
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

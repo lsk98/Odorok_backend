@@ -4,7 +4,7 @@ package com.odorok.OdorokApplication.security.service;
 import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.security.dto.SignupRequest;
 import com.odorok.OdorokApplication.security.exception.DuplicateUserEmailException;
-import com.odorok.OdorokApplication.security.repository.UserRepository;
+import com.odorok.OdorokApplication.security.repository.AuthUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 public class SignupServiceImpl implements SignupService{
-    private final UserRepository userRepository;
+    private final AuthUserRepository authUserRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Override
     public void signup(SignupRequest request) {
@@ -23,11 +23,11 @@ public class SignupServiceImpl implements SignupService{
                 .nickname(request.getNickname())
                 .role("ROLE_USER").build();
 
-        if(userRepository.existsByEmail(request.getEmail())) {
+        if(authUserRepository.existsByEmail(request.getEmail())) {
             log.debug("이미 존재하는 이메일 입니다. (email : "+request.getEmail() + ")");
             throw new DuplicateUserEmailException("이미 존재하는 이메일 입니다. (email : "+request.getEmail() + ")");
         }
 
-        userRepository.save(user);
+        authUserRepository.save(user);
     }
 }

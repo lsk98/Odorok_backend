@@ -3,11 +3,10 @@ package com.odorok.OdorokApplication.security.config;
 import com.odorok.OdorokApplication.security.filter.CustomLoginFilter;
 import com.odorok.OdorokApplication.security.filter.JWTFilter;
 import com.odorok.OdorokApplication.security.jwt.JWTUtil;
-import com.odorok.OdorokApplication.security.repository.UserRepository;
+import com.odorok.OdorokApplication.security.repository.AuthUserRepository;
 import com.odorok.OdorokApplication.security.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +39,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final AuthService authService;
-    private final UserRepository userRepository;
+    private final AuthUserRepository authUserRepository;
 
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -126,7 +125,7 @@ public class SecurityConfig {
         Collections.addAll(allowedUris, uris);
 
 
-        JWTFilter jwtFilter = new JWTFilter(jwtUtil, allowedUris, authService, userRepository);
+        JWTFilter jwtFilter = new JWTFilter(jwtUtil, allowedUris, authService, authUserRepository);
         http.addFilterBefore(jwtFilter, CustomLoginFilter.class);
 
         // 가장 중요한 처리 : 세션을 생성하지 않도록 함.

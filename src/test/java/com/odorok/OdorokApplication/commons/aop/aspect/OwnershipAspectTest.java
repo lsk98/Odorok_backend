@@ -6,7 +6,7 @@ import com.odorok.OdorokApplication.community.service.ArticleService;
 import com.odorok.OdorokApplication.course.repository.UserRepository;
 import com.odorok.OdorokApplication.domain.User;
 import com.odorok.OdorokApplication.draftDomain.Article;
-import com.odorok.OdorokApplication.security.domain.UserStuff;
+import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,8 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -48,11 +48,9 @@ class OwnershipAspectTest {
         article.setContent("owner");
         articleId = article.getId();
     }
+
     private void mockSecurityContext(User user) {
-        UserStuff secuUserStuff =
-                new UserStuff(user.getId(),user.getName(),user.getNickname(),user.getEmail()
-                ,user.getPassword(),"refresh");
-        CustomUserDetails userDetails = new CustomUserDetails(secuUserStuff);
+        CustomUserDetails userDetails = new CustomUserDetails(user);
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContext context = SecurityContextHolder.createEmptyContext();

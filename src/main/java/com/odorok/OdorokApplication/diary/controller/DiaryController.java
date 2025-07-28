@@ -8,6 +8,7 @@ import com.odorok.OdorokApplication.diary.dto.request.DiaryRegenerationRequest;
 import com.odorok.OdorokApplication.diary.dto.request.DiaryRequest;
 import com.odorok.OdorokApplication.diary.dto.response.*;
 import com.odorok.OdorokApplication.diary.service.DiaryService;
+import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,12 +124,12 @@ public class DiaryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @DeleteMapping("/{diaryId}")
-    public ResponseEntity<?> deleteDiary(@PathVariable Long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
-        //        long userId = user.getUser().getId();
-        diaryService.deleteDiary(userId, diaryId);
-        ResponseRoot<?> response = success("일지 삭제 성공");
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-
-    }
+//    @DeleteMapping("/{diaryId}")
+//    public ResponseEntity<?> deleteDiary(@PathVariable Long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
+//        //        long userId = user.getUser().getId();
+//        diaryService.deleteDiary(userId, diaryId);
+//        ResponseRoot<?> response = success("일지 삭제 성공");
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//
+//    }
 }

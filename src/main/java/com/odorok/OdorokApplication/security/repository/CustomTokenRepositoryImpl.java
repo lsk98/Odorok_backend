@@ -1,7 +1,7 @@
 package com.odorok.OdorokApplication.security.repository;
 
-import com.e104.reciplay.security.domain.QToken;
-import com.e104.reciplay.security.domain.Token;
+import com.odorok.OdorokApplication.security.domain.QToken;
+import com.odorok.OdorokApplication.security.domain.Token;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

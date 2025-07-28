@@ -45,7 +45,9 @@ public class RegionApiController {
     public ResponseEntity<ResponseRoot<SigunguResponse>> getAllSigunguOf(@RequestParam("sidoCode") Integer sidoCode) {
         Set<Integer> validSet = courseQueryService.queryValidSidoCodes();
         if(!validSet.contains(sidoCode)) {
-            throw new InvalidSidoCodeException("유효하지 않은 시도 코드입니다 (sidoCode : " + sidoCode + ")");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                    .body(CommonResponseBuilder.fail("유효하지 않은 시도 코드"));
+
         }
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
                 .body(CommonResponseBuilder.success("시군구 조회 성공", new SigunguResponse(regionQueryService.queryAllSigunguOf(sidoCode))));

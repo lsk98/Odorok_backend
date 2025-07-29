@@ -12,6 +12,7 @@ import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.util.PromptTemplate;
 import com.odorok.OdorokApplication.domain.Diary;
+import com.odorok.OdorokApplication.domain.DiaryImage;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.draftDomain.Item;
 import com.odorok.OdorokApplication.gpt.service.GptService;
@@ -22,13 +23,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -97,6 +96,34 @@ public class DiaryServiceImpl implements DiaryService{
                         .count(0)
                         .build());
         return new DiaryPermissionCheckResponse(inventory.getUserId(), inventory.getItemId(), inventory.getCount());
+    }
+
+    @Override
+    @Transactional
+    public void deleteDiaryById(long userId, long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> {
+                    log.warn("일지 삭제 실패: 존재하지 않는 일지. diaryId={}, userId={}", diaryId, userId);
+                    return new IllegalArgumentException("존재하지 않는 일지");
+                });
+
+        if (diary.getUserId() != userId) {
+            log.warn("일지 삭제 실패: 권한 없음. diaryId={}, userId={}", diaryId, userId);
+            throw new AccessDeniedException("본인이 작성한 일지만 삭제할 수 있음");
+        }
+        // 다이어리 이미지 삭제
+        List<DiaryImage> diaryImages = Optional.ofNullable(diaryImageService.getDiaryImages(diaryId))
+                .orElse(Collections.emptyList());
+        List<String> imgUrls = diaryImages.stream()
+                        .map(DiaryImage::getImgUrl)
+                        .collect(Collectors.toList());
+
+        log.info("일지 이미지 삭제 시작: diaryId={}, imageCount={}", diaryId, imgUrls.size());
+        diaryImageService.deleteDiaryImages(imgUrls);
+
+        // 다이어리 삭제
+        diaryRepository.deleteById(diaryId);
+        log.info("일지 삭제 완료: diaryId={}, userId={}", diaryId, userId);
     }
 
     @Override

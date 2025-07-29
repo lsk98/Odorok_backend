@@ -18,6 +18,8 @@ public interface DiaryService {
 
     public DiaryDetail findDiaryById(long userId, long diaryId);
 
+    public void deleteDiaryById(long userId, long diaryId);
+
     public DiaryPermissionCheckResponse findDiaryPermission(long userId);
 
     public DiaryChatResponse insertGeneration(long userId, String style, Long visitedCoursesId) throws GptCommunicationException;

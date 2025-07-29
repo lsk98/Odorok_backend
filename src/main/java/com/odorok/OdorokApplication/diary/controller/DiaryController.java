@@ -124,12 +124,11 @@ public class DiaryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-//    @DeleteMapping("/{diaryId}")
-//    public ResponseEntity<?> deleteDiary(@PathVariable Long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
-//        //        long userId = user.getUser().getId();
-//        diaryService.deleteDiary(userId, diaryId);
-//        ResponseRoot<?> response = success("일지 삭제 성공");
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//
-//    }
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<?> deleteDiary(@PathVariable Long diaryId, @AuthenticationPrincipal CustomUserDetails user) {
+        long userId = user.getUserId();
+        diaryService.deleteDiaryById(userId, diaryId);
+        ResponseRoot<?> response = success("일지 삭제 성공");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

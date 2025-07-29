@@ -41,4 +41,9 @@ public class DiaryImageServiceImpl implements DiaryImageService {
     public void deleteDiaryImages(List<String> imgUrls) {
         s3Service.deleteMany(imgUrls);
     }
+
+    @Override
+    public List<DiaryImage> getDiaryImages(Long diaryId) {
+        return diaryImageRepository.findByDiaryId(diaryId);
+    }
 }

@@ -94,40 +94,40 @@ public class CourseQueryServiceImpl implements CourseQueryService{
         return this.queryValidSidoCodes().contains(sidoCode);
     }
 
-    public List<DiseaseAndCourses> queryCoursesForDiseasesOfView(Long userId, RecommendationCriteria criteria, Pageable pageable) {
-        List<DiseaseAndCourses> result = new ArrayList<>();
+//    public List<DiseaseAndCourses> queryCoursesForDiseasesOfView(Long userId, RecommendationCriteria criteria, Pageable pageable) {
+//        List<DiseaseAndCourses> result = new ArrayList<>();
+//
+//        List<UserDisease> diseases = userDiseaseQueryService.queryUserDiseases(userId);
+//        for (UserDisease disease : diseases) {
+//            result.add(this.queryCoursesOfDisease(disease.getDiseaseId(), criteria, pageable));
+//        }
+//
+//        return result;
+//    }
 
-        List<UserDisease> diseases = userDiseaseQueryService.queryUserDiseases(userId);
-        for (UserDisease disease : diseases) {
-            result.add(this.queryCoursesOfDisease(disease.getDiseaseId(), criteria, pageable));
-        }
-
-        return result;
-    }
-
-    public DiseaseAndCourses queryCoursesOfDisease(Long diseaseId, RecommendationCriteria criteria, Pageable pageable) {
-        List<DiseaseCourseStat> stats = diseaseCourseStatQueryService.queryDiseaseCourseStatFor(diseaseId);
-        if(stats.isEmpty()) return null;
-
-        stats.sort(criteria.comparator());
-
-        DiseaseAndCourses result = new DiseaseAndCourses();
-        result.setDiseaseCode(diseaseId);
-
-        List<RecommendedCourseSummary> courses = new ArrayList<>();
-        for(int i = 0; i < Math.min(pageable.getPageSize(), stats.size()); i++) {
-            courses.add(new RecommendedCourseSummary(
-                    courseRepository.findById(stats.get(i).getCourseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코스 아이디로 조회를 시도했습니다.")),
-                    (int)Math.round(stats.get(i).getAvgStars()),
-                    stats.get(i).getReviewCount().intValue(),
-                    stats.get(i).getVisitationCount()
-                    )
-            );
-        }
-
-        result.setCourses(courses);
-        return result;
-    }
+//    public DiseaseAndCourses queryCoursesOfDisease(Long diseaseId, RecommendationCriteria criteria, Pageable pageable) {
+//        List<DiseaseCourseStat> stats = diseaseCourseStatQueryService.queryDiseaseCourseStatFor(diseaseId);
+//        if(stats.isEmpty()) return null;
+//
+//        stats.sort(criteria.comparator());
+//
+//        DiseaseAndCourses result = new DiseaseAndCourses();
+//        result.setDiseaseCode(diseaseId);
+//
+//        List<RecommendedCourseSummary> courses = new ArrayList<>();
+//        for(int i = 0; i < Math.min(pageable.getPageSize(), stats.size()); i++) {
+//            courses.add(new RecommendedCourseSummary(
+//                    courseRepository.findById(stats.get(i).getCourseId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 코스 아이디로 조회를 시도했습니다.")),
+//                    (int)Math.round(stats.get(i).getAvgStars()),
+//                    stats.get(i).getReviewCount().intValue(),
+//                    stats.get(i).getVisitationCount()
+//                    )
+//            );
+//        }
+//
+//        result.setCourses(courses);
+//        return result;
+//    }
 
 
     public List<DiseaseAndCourses> queryCoursesForDiseaseOfBrutal(Long userId, RecommendationCriteria criteria, Pageable pageable) {

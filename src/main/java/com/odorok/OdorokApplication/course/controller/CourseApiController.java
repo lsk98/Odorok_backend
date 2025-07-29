@@ -58,13 +58,14 @@ public class CourseApiController {
     @ApiResponse(responseCode = "500", description = "서버 내부에서 조회에 실패하는 경우임.")
     public ResponseEntity<ResponseRoot<CourseResponse>> searchByRegionCode(@RequestParam("sidoCode") Integer sidoCode,
                                                                            @RequestParam("sigunguCode") Integer sigunguCode,
-                                                                           @RequestParam(value = "email", required = false) String email,
+                                                                           @AuthenticationPrincipal CustomUserDetails user,
                                                                            @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable) {
+        String email = (user != null ? user.getUsername() : null);
         // 페이징 넣기.
         log.debug("지역 코스 검색 리퀘스트 : {}, {}, {}, {}, {}", sidoCode, sigunguCode, email, pageable.getPageNumber(), pageable.getPageSize());
 
         if(!courseQueryService.checkSidoCodeValidation(sidoCode)) {
-            throw new InvalidSidoCodeException("유효하지 않은 시도 코드 입니다. (sidoCode="+sidoCode+")");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(CommonResponseBuilder.fail("유효하지 않은 시도 코드 입니다. " + sidoCode));
         }
 
         Long userId = null;
@@ -85,8 +86,9 @@ public class CourseApiController {
     @ApiResponse(responseCode = "200", description = "조회 성공시 요약 정보들이 전송됨")
     @ApiResponse(responseCode = "500", description = "서버 내부에서 조회에 실패하는 경우임.")
     public ResponseEntity<ResponseRoot<CourseResponse>> getAllCourses(
-            @RequestParam(value = "email", required = false) String email,
+            @AuthenticationPrincipal CustomUserDetails user,
             @PageableDefault(size = 10, page = 0, sort = "createdAt") Pageable pageable) {
+        String email = (user != null) ? user.getUsername() : null;
         log.debug("전체 코스 검색 리퀘스트 : {}, {}, {}", email, pageable.getPageNumber(), pageable.getPageSize());
         Long userId = null;
         if (email != null) userId = userService.queryByEmail(email).getId();
@@ -199,5 +201,16 @@ public class CourseApiController {
 
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                 .body(CommonResponseBuilder.successCreated("코스 방문 예정 등록에 성공했습니다.", null));
+    }
+
+    // 코스 리뷰 조회
+    @GetMapping("/reviews")
+    @Operation(summary = "코스에 대한 리뷰를 조회합니다.", description = "특정 코스에 대한 리뷰를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공 리뷰 데이터가 전송됨")
+    @ApiResponse(responseCode = "500", description = "서버 내부에서 조회에 실패하는 경우임.")
+    public ResponseEntity<ResponseRoot<VisitationScheduleResponse>> getCourseReviews(@RequestParam("courseId") Long courseId) {
+        return null;
+//        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+//                .body(CommonResponseBuilder.success("", new VisitationScheduleResponse(summaries)));
     }
 }

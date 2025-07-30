@@ -9,9 +9,16 @@ import com.odorok.OdorokApplication.gpt.service.GptService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DiaryService {
+    public List<DiarySummary> findAllDiaryByUser(long userId);
+
+    public Map<String, List<DiarySummary>> findAllDiaryGroupByYear(long userId);
+
     public DiaryDetail findDiaryById(long userId, long diaryId);
+
+    public void deleteDiaryById(long userId, long diaryId);
 
     public DiaryPermissionCheckResponse findDiaryPermission(long userId);
 

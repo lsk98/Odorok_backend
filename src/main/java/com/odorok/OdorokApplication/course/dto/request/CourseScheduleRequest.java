@@ -17,6 +17,5 @@ import java.util.List;
 public class CourseScheduleRequest {
     Long courseId;
     LocalDateTime dueDate;
-    String email;
     List<Long> attractionIds = new ArrayList<>();
 }

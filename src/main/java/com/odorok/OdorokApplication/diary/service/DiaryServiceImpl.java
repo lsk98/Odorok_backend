@@ -12,6 +12,7 @@ import com.odorok.OdorokApplication.diary.repository.DiaryRepository;
 import com.odorok.OdorokApplication.diary.repository.VisitedCourseRepository;
 import com.odorok.OdorokApplication.diary.util.PromptTemplate;
 import com.odorok.OdorokApplication.domain.Diary;
+import com.odorok.OdorokApplication.domain.DiaryImage;
 import com.odorok.OdorokApplication.draftDomain.Inventory;
 import com.odorok.OdorokApplication.draftDomain.Item;
 import com.odorok.OdorokApplication.gpt.service.GptService;
@@ -22,10 +23,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -49,6 +52,8 @@ public class DiaryServiceImpl implements DiaryService{
     @Value("${gpt.default-feedback-prompt}")
     private String defaultFeedbackPrompt;
 
+    @Value("${gpt.generation-finalize-diary-prompt}")
+    private String generationFinalizeDiaryPrompt;
     // 일지 생성권 itemId 캐싱.
     @PostConstruct
     public void initDiaryItemId() {
@@ -57,6 +62,23 @@ public class DiaryServiceImpl implements DiaryService{
                 .orElseThrow(() ->
                         new IllegalStateException("'일지 생성권' 아이템이 DB에 없습니다. 서버 실행 중단. 데이터 삽입을 확인하세요.")
                 );
+    }
+
+    @Override
+    public List<DiarySummary> findAllDiaryByUser(long userId) {
+        return diaryRepository.findDiaryByUserId(userId);
+    }
+
+    @Override
+    public Map<String, List<DiarySummary>> findAllDiaryGroupByYear(long userId) {
+        List<DiarySummary> diaryList = diaryRepository.findDiaryByUserId(userId);
+        return diaryList.stream()
+                .sorted(Comparator.comparing(DiarySummary::getCreatedAt).reversed())
+                        .collect(Collectors.groupingBy(
+                                diary -> String.valueOf(diary.getCreatedAt().getYear()),
+                                LinkedHashMap::new,
+                                Collectors.toList()
+                        ));
     }
 
     @Override
@@ -74,6 +96,34 @@ public class DiaryServiceImpl implements DiaryService{
                         .count(0)
                         .build());
         return new DiaryPermissionCheckResponse(inventory.getUserId(), inventory.getItemId(), inventory.getCount());
+    }
+
+    @Override
+    @Transactional
+    public void deleteDiaryById(long userId, long diaryId) {
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> {
+                    log.warn("일지 삭제 실패: 존재하지 않는 일지. diaryId={}, userId={}", diaryId, userId);
+                    return new IllegalArgumentException("존재하지 않는 일지");
+                });
+
+        if (diary.getUserId() != userId) {
+            log.warn("일지 삭제 실패: 권한 없음. diaryId={}, userId={}", diaryId, userId);
+            throw new AccessDeniedException("본인이 작성한 일지만 삭제할 수 있음");
+        }
+        // 다이어리 이미지 삭제
+        List<DiaryImage> diaryImages = Optional.ofNullable(diaryImageService.getDiaryImages(diaryId))
+                .orElse(Collections.emptyList());
+        List<String> imgUrls = diaryImages.stream()
+                        .map(DiaryImage::getImgUrl)
+                        .collect(Collectors.toList());
+
+        log.info("일지 이미지 삭제 시작: diaryId={}, imageCount={}", diaryId, imgUrls.size());
+        diaryImageService.deleteDiaryImages(imgUrls);
+
+        // 다이어리 삭제
+        diaryRepository.deleteById(diaryId);
+        log.info("일지 삭제 완료: diaryId={}, userId={}", diaryId, userId);
     }
 
     @Override
@@ -172,16 +222,15 @@ public class DiaryServiceImpl implements DiaryService{
     @Override
     @Transactional
     public Long insertFinalizeDiary(long userId, DiaryRequest diaryRequest, List<MultipartFile> images) {
-        List<String> imageUrls = null;
+        // s3에 이미지 등록
+        List<String> imageUrls = diaryImageService.insertDiaryImage(images, userId);
         try {
-            // s3에 이미지 등록
-            imageUrls = diaryImageService.insertDiaryImage(images, userId);
-
+            String finalDiaryContent = getFinalizeContentWithMarkup(diaryRequest.getContent());
             // 일지 title, content 등록
             Diary diary = Diary.builder()
                     .title(diaryRequest.getTitle())
-                    .content(diaryRequest.getContent())
                     .vcourseId(diaryRequest.getVcourseId())
+                    .content(finalDiaryContent)
                     .userId(userId)
                     .build();
             Diary savedDiary = diaryRepository.save(diary);
@@ -195,5 +244,22 @@ public class DiaryServiceImpl implements DiaryService{
             log.error("일지 DB 등록 중 예외 발생 - 이미지 정리 후 예외 전파", e);
             throw e;
         }
+    }
+
+    public String getFinalizeContentWithMarkup(String content) {
+        String requestDiary = PromptTemplate.of(generationFinalizeDiaryPrompt)
+                .with("diaryContent", content)
+                .build();
+        log.debug("최종 일지 내용을 markup으로 수정하기 위한 요청 프롬프트: {} ", requestDiary);
+        GptService.Prompt prompt = GptService.Prompt.builder()
+                .role("user")
+                .content(requestDiary)
+                .build();
+        List<GptService.Prompt> chatLog = gptService.sendPrompt(null, prompt);
+        if (chatLog.isEmpty()) {
+            log.warn("최종 일지 요청 후 GPT 응답이 비어 있음. prompt: {}", prompt);
+            throw new GptCommunicationException("GPT 응답이 비어있음 ");
+        }
+        return chatLog.get(chatLog.size() - 1).getContent();
     }
 }

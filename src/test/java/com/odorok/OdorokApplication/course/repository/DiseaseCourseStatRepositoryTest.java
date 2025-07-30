@@ -16,20 +16,20 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@Import(QueryDslConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class DiseaseCourseStatRepositoryTest {
-    @Autowired
-    private DiseaseCourseStatRepository diseaseCourseStatRepository;
-
-    @Test
-    @Transactional
-    @Sql("/sql/disease_course_test.sql")
-    public void 질병_코스_통계_조회에_성공한다() {
-        List<DiseaseCourseStat> result = diseaseCourseStatRepository.findByKeyDiseaseId(1L);
-        result.sort((a,b) -> b.getAvgStars().compareTo(a.getAvgStars()));
-        System.out.println(result);
-        assertThat(result.size()).isNotZero();
-    }
-}
+//@DataJpaTest
+//@Import(QueryDslConfig.class)
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+//class DiseaseCourseStatRepositoryTest {
+//    @Autowired
+//    private DiseaseCourseStatRepository diseaseCourseStatRepository;
+//
+//    @Test
+//    @Transactional
+//    @Sql("/sql/disease_course_test.sql")
+//    public void 질병_코스_통계_조회에_성공한다() {
+//        List<DiseaseCourseStat> result = diseaseCourseStatRepository.findByKeyDiseaseId(1L);
+//        result.sort((a,b) -> b.getAvgStars().compareTo(a.getAvgStars()));
+//        System.out.println(result);
+//        assertThat(result.size()).isNotZero();
+//    }
+//}

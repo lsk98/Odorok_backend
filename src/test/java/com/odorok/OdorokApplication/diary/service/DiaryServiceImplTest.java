@@ -473,15 +473,32 @@ public class DiaryServiceImplTest {
     }
 
     @Nested
-    class InsergFinalizeTest {
+    class InsertFinalizeTest {
         @Mock
         private DiaryImageService diaryImageService;
 
         @Mock
         private DiaryRepository diaryRepository;
 
+        @Mock
+        private GptService gptService;
+
         @InjectMocks
         private DiaryServiceImpl diaryService;
+
+        private final String generationFinalizeDiaryPrompt =
+                """
+                아래에 제공하는 여행 일지 원문을 **절대 수정하지 말고** 그대로 유지하되, Markdown 문법을 활용해 가독성을 높여 주세요.
+                #### 여행 일지 원문
+                {diaryContent}
+                """;
+        @BeforeEach
+        void setUp() {
+            ReflectionTestUtils.setField(diaryService, "generationFinalizeDiaryPrompt", generationFinalizeDiaryPrompt);
+            when(gptService.sendPrompt(any(), any(GptService.Prompt.class))).thenReturn(
+                    List.of(new GptService.Prompt("user", "최종 일지 생성"),
+                            new GptService.Prompt("assistant", "마크업으로 바꾼 최종 일지")));
+        }
 
         @Test
         void 최종_일지_저장_성공() {
@@ -498,8 +515,9 @@ public class DiaryServiceImplTest {
                     .vcourseId(diaryRequest.getVcourseId())
                     .build();
 
-            when(diaryImageService.insertDiaryImage(images, userId)).thenReturn(imgUrls);
+            when(diaryImageService.insertDiaryImage(anyList(), any())).thenReturn(imgUrls);
             when(diaryRepository.save(any(Diary.class))).thenReturn(savedDiary);
+
 
             Long savedId = diaryService.insertFinalizeDiary(userId, diaryRequest, images);
             assertEquals(savedDiary.getId(), savedId);
@@ -516,7 +534,8 @@ public class DiaryServiceImplTest {
             List<String> imgUrls = List.of("https://s3/image1.jpg", "https://s3/image2.jpg");
 
             when(diaryImageService.insertDiaryImage(images, userId)).thenReturn(imgUrls);
-            when(diaryRepository.save(any(Diary.class))).thenThrow(new RuntimeException("DB 에러"));
+//          when(diaryRepository.save(any(Diary.class))).thenThrow(new RuntimeException("DB 에러"));
+            doThrow(new RuntimeException("DB 에러")).when(diaryRepository).save(any(Diary.class));
 
             assertThrows(RuntimeException.class, () -> {
                 diaryService.insertFinalizeDiary(userId, diaryRequest, images);

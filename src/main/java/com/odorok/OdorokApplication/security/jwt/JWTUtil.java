@@ -1,50 +1,41 @@
-//package com.odorok.OdorokApplication.security.jwt;
-//
-//import com.odorok.OdorokApplication.security.domain.User;
-//import io.jsonwebtoken.Claims;
-//import io.jsonwebtoken.Jwts;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.stereotype.Component;
-//
-//import javax.crypto.SecretKey;
-//import java.util.Date;
-//import java.util.Map;
-//
-//@Slf4j
-//public class JWTUtil {
-//    private final SecretKey key;
-//
-//    public JWTUtil() {
-//        key = Jwts.SIG.HS256.key().build();
-//    }
-//
-//    @Value("${jwt.access.expmin}")
-//    private long accessExpMin;
-//    @Value("${jwt.refresh.expmin}")
-//    private long refreshExpMin;
-//
-//    public String createAccessToken(User user) {
-//        return create("accessToken", accessExpMin,
-//                Map.of( "id", user.getId(), "email", user.getEmail(), "nickname", user.getNickname(), "name", user.getName()));
-//    }
-//
-//    public String createRefreshToken(User user) {
-//        return create("refreshToken", refreshExpMin,
-//                Map.of("id", user.getId(), "email", user.getEmail()));
-//    }
-//
-//    public String create(String subject, long expireMin, Map<String, Object> claims) {
-//        Date expireDate = new Date(System.currentTimeMillis() + 1000 * 60 * expireMin);
-//        String token = Jwts.builder().subject(subject).claims(claims).expiration(expireDate).signWith(key).compact();
-//        log.debug("token 생성: {}", token);
-//        return token;
-//    }
-//
-//    public Claims getClaims(String jwt) {
-//        var parser = Jwts.parser().verifyWith(key).build();
-//        var jws = parser.parseSignedClaims(jwt);
-//        log.debug("claims: {}", jws.getPayload());
-//        return jws.getPayload();
-//    }
-//}
+package com.odorok.OdorokApplication.security.jwt;
+
+import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Component
+public class JWTUtil {
+    private SecretKey secretKey;
+
+    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    }
+
+    public String getUsername(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
+    }
+
+    public String getRole(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+    }
+
+    public Boolean isExpired(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+    }
+
+    public String createJwt(String username, String role, Long expiredMs) {
+        return Jwts.builder()
+                .claim("username", username)
+                .claim("role", (role == null ? "" : role)) // 리프레시 토큰이면 role이 null이라 빈 문자열 전달함.
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .signWith(secretKey)
+                .compact();
+    }
+}

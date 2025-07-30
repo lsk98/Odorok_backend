@@ -1,9 +1,7 @@
 package com.odorok.OdorokApplication.community.controller;
 
-import com.odorok.OdorokApplication.commons.aop.annotation.CheckArticleOwner;
 import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.commons.response.ResponseRoot;
-import com.odorok.OdorokApplication.commons.response.CommonResponseBuilder;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
@@ -12,17 +10,14 @@ import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.service.ArticleService;
 import com.odorok.OdorokApplication.draftDomain.Article;
-import com.odorok.OdorokApplication.security.principal.CustomUserDetails;
+import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
-import static com.odorok.OdorokApplication.domain.QUser.user;
 
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
@@ -39,7 +34,7 @@ public class ArticleApiController {
     public ResponseEntity<ResponseRoot<Void>> registArticle(@RequestPart("data") ArticleRegistRequest request,
                                                             @RequestPart("images") List<MultipartFile> images,
                                                             @AuthenticationPrincipal CustomUserDetails user) {
-        long userId = user.getUser().getId();
+        long userId = user.getUserId();
         articleService.insertArticle(request, images, userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 등록되었습니다."));
     }
@@ -62,7 +57,7 @@ public class ArticleApiController {
                                                             @PathVariable("articles-id") Long articleId,
                                                             @AuthenticationPrincipal CustomUserDetails user
                                                             ) {
-        Long userId = user.getUser().getId();
+        Long userId = user.getUserId();
         articleService.updateArticle(request,images,articleId,userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 수정되었습니다."));
     }
@@ -70,7 +65,7 @@ public class ArticleApiController {
     public ResponseEntity<ResponseRoot<Void>> updateArticleLike(@PathVariable("articles-id") Long articleId,
                                                             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        Long userId = user.getUser().getId();
+        Long userId = user.getUserId();
         articleService.updateLike(articleId,userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("좋아요가 등록되었습니다."));
     }
@@ -85,7 +80,7 @@ public class ArticleApiController {
                                                            @AuthenticationPrincipal CustomUserDetails user,
                                                            @RequestBody CommentRegistRequest request
     ) {
-        Long userId = user.getUser().getId();
+        Long userId = user.getUserId();
         articleService.registComment(articleId,request,userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("댓글 작성 성공"));
     }

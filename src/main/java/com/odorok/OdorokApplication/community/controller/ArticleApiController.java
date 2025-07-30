@@ -67,7 +67,7 @@ public class ArticleApiController {
         return ResponseEntity.ok(CommonResponseBuilder.success("게시물이 성공적으로 수정되었습니다."));
     }
     @PostMapping("/{articles-id}/likes")
-    public ResponseEntity<ResponseRoot<Void>> updateArticle(@PathVariable("articles-id") Long articleId,
+    public ResponseEntity<ResponseRoot<Void>> updateArticleLike(@PathVariable("articles-id") Long articleId,
                                                             @AuthenticationPrincipal CustomUserDetails user
     ) {
         Long userId = user.getUser().getId();

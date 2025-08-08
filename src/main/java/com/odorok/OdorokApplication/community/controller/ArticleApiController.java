@@ -6,6 +6,7 @@ import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition
 import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
 import com.odorok.OdorokApplication.community.dto.request.CommentRegistRequest;
+import com.odorok.OdorokApplication.community.dto.response.ArticleDetail;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.service.ArticleService;
@@ -40,9 +41,9 @@ public class ArticleApiController {
     }
 
     @GetMapping("/{articles-id}")
-    public ResponseEntity<ResponseRoot<Article>> searchArticleDetail(@PathVariable("articles-id") Long articleId) {
-        Article article = articleService.findByArticleId(articleId);
-        return ResponseEntity.ok(CommonResponseBuilder.success("게시물 조회 성공", article));
+    public ResponseEntity<ResponseRoot<ArticleDetail>> searchArticleDetail(@PathVariable("articles-id") Long articleId) {
+        ArticleDetail articleDetail = articleService.findByArticleId(articleId);
+        return ResponseEntity.ok(CommonResponseBuilder.success("게시물 조회 성공", articleDetail));
     }
 
     @DeleteMapping("/{articles-id}")

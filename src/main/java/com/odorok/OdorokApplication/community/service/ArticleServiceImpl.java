@@ -5,6 +5,7 @@ import com.odorok.OdorokApplication.community.dto.request.ArticleRegistRequest;
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
 import com.odorok.OdorokApplication.community.dto.request.ArticleUpdateRequest;
 import com.odorok.OdorokApplication.community.dto.request.CommentRegistRequest;
+import com.odorok.OdorokApplication.community.dto.response.ArticleDetail;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
@@ -51,9 +52,9 @@ public class ArticleServiceImpl implements ArticleService{
     }
 
     @Override
-    public Article findByArticleId(Long articleId) {
-        Article article = articleRepository.getById(articleId);
-        return article;
+    public ArticleDetail findByArticleId(Long articleId) {
+        ArticleDetail articleDetail = articleRepository.findArticleDetailById(articleId);
+        return articleDetail;
     }
 
     @Override

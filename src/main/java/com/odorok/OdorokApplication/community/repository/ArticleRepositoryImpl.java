@@ -1,11 +1,16 @@
 package com.odorok.OdorokApplication.community.repository;
 
 import com.odorok.OdorokApplication.community.dto.request.ArticleSearchCondition;
+import com.odorok.OdorokApplication.community.dto.response.ArticleDetail;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.QArticleSummary;
 import com.odorok.OdorokApplication.domain.QUser;
+import com.odorok.OdorokApplication.draftDomain.Article;
 import com.odorok.OdorokApplication.draftDomain.QArticle;
+import com.odorok.OdorokApplication.draftDomain.QProfile;
+import com.odorok.OdorokApplication.draftDomain.QTier;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
@@ -13,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -22,6 +28,8 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QArticle article = QArticle.article;
     private final QUser user = QUser.user;
+    private final QTier tier = QTier.tier;
+    private final QProfile profile = QProfile.profile;
 
     @Override
     public List<ArticleSummary> findByCondition(ArticleSearchCondition cond) {
@@ -30,7 +38,6 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         article.id
                 ).from(article)
                 .where(
-                        categoryEq(cond.getCategory()),
                         titleLike(cond.getTitle())
                 )
                 .orderBy(getSortOrder(cond.getSort()))
@@ -43,17 +50,13 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         new QArticleSummary(
                                 article.id,
                                 article.title,
-                                article.content,
                                 article.createdAt,
                                 article.likeCount,
                                 article.viewCount,
                                 article.commentCount,
                                 article.boardType,
                                 article.notice,
-                                article.courseId,
-                                article.diseaseId,
                                 user.nickname
-
                         )
                 ).from(article)
                 .join(user).on(article.userId.eq(user.id))
@@ -63,15 +66,21 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
 
         return result;
     }
-
-    @Nullable
-    private BooleanExpression categoryEq(Integer category) {
-        return article.boardType.eq(category);
+    @Override
+    public ArticleDetail findArticleDetailById(Long articleId) {
+        ArticleDetail articleDetail = queryFactory.select(Projections.constructor(ArticleDetail.class,
+                article.id,article.title,article.content,article.createdAt,article.likeCount,article.viewCount,
+                article.commentCount,article.notice,article.userId,user.nickname,tier.title)).from(article)
+                .join(user).on(article.userId.eq(user.id))
+                .join(profile).on(article.userId.eq(profile.userId))
+                .join(tier).on(profile.tierId.eq(tier.id)).where(article.id.eq(articleId)).fetchOne();
+        return articleDetail;
     }
 
+
     @Nullable
-    private BooleanExpression titleLike(String title){
-        return StringUtils.hasText(title) ? article.title.like("%"+title+"%") : null;
+    private BooleanExpression titleLike(String title) {
+        return StringUtils.hasText(title) ? article.title.like("%" + title + "%") : null;
     }
 
     private OrderSpecifier<?> getSortOrder(String sort) {

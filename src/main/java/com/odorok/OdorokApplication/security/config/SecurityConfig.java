@@ -110,7 +110,8 @@ public class SecurityConfig {
 
         // 인증 필터에서 통과시킬 경로를 설정한다.
         Set<String> allowedUris = new HashSet<>();
-        String[] uris = {"/api/courses",
+        String[] uris = {
+                "/api/courses",
                 "/refresh-token",
                 "/api/courses/detail",
                 "/api/courses/region",

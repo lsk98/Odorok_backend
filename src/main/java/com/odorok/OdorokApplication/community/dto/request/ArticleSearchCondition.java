@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ArticleSearchCondition {
-    private int category;
     private int pageNum;
     private String sort;
     private String title;

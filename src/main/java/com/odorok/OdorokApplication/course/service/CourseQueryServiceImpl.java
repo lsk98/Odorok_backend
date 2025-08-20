@@ -1,25 +1,23 @@
 package com.odorok.OdorokApplication.course.service;
 
-import com.odorok.OdorokApplication.course.domain.DiseaseCourseStat;
 import com.odorok.OdorokApplication.course.dto.process.CourseStat;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseDetail;
 import com.odorok.OdorokApplication.course.dto.response.item.CourseSummary;
 import com.odorok.OdorokApplication.course.dto.response.item.DiseaseAndCourses;
 import com.odorok.OdorokApplication.course.dto.response.item.RecommendedCourseSummary;
 import com.odorok.OdorokApplication.course.repository.CourseRepository;
-import com.odorok.OdorokApplication.course.repository.UserDiseaseRepository;
 import com.odorok.OdorokApplication.domain.UserDisease;
 import com.odorok.OdorokApplication.domain.VisitedCourse;
 import com.odorok.OdorokApplication.infrastructures.domain.Course;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+// 작은 수정
 @Service
 @RequiredArgsConstructor
 public class CourseQueryServiceImpl implements CourseQueryService{
@@ -27,7 +25,7 @@ public class CourseQueryServiceImpl implements CourseQueryService{
     private final RouteQueryService routeQueryService;
     private final VisitedCourseQueryService visitedCourseQueryService;
     private final PathCoordQueryService pathCoordQueryService;
-    private final DiseaseCourseStatQueryService diseaseCourseStatQueryService;
+//    private final DiseaseCourseStatQueryService diseaseCourseStatQueryService;
     private final UserDiseaseQueryService userDiseaseQueryService;
 
     @Override

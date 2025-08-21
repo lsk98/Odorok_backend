@@ -3,9 +3,9 @@ pipeline {
     stages {
         stage('Prepare'){
             steps {
-                git credentialsId : '{credentialId}',
-                    branch : '{branchName}',
-                    url : 'https://github.com/{repoName}/{projectName}.git'
+                git credentialsId : 'GithubOdorok',
+                    branch : 'test',
+                    url : 'https://github.com/Team-Odorok/Odorok_backend.git'
             }
         }
         stage('test') {

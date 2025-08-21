@@ -36,8 +36,8 @@ class CourseQueryServiceImplTest {
     @Mock
     private PathCoordQueryService pathCoordQueryService;
 
-    @Mock
-    private DiseaseCourseStatQueryService diseaseCourseStatQueryService;
+//    @Mock
+//    private DiseaseCourseStatQueryService diseaseCourseStatQueryService;
     @Mock
     private UserDiseaseQueryService userDiseaseQueryService;
 

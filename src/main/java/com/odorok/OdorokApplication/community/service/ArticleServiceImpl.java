@@ -10,10 +10,12 @@ import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
 import com.odorok.OdorokApplication.community.repository.CommentRepository;
+import com.odorok.OdorokApplication.community.repository.DiseaseRepository;
 import com.odorok.OdorokApplication.community.repository.LikeRepository;
 import com.odorok.OdorokApplication.domain.Comment;
 import com.odorok.OdorokApplication.domain.Like;
 import com.odorok.OdorokApplication.draftDomain.Article;
+import com.odorok.OdorokApplication.draftDomain.Disease;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class ArticleServiceImpl implements ArticleService{
     private final ArticleTransactionService articleTransactionService;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final DiseaseRepository diseaseRepository;
 
     @Override
     public void insertArticle(ArticleRegistRequest request, List<MultipartFile> images, Long userId) {
@@ -93,6 +96,11 @@ public class ArticleServiceImpl implements ArticleService{
     public void registComment(Long articleId, CommentRegistRequest request, Long userId) {
         Comment comment = Comment.builder().articleId(articleId).content(request.getContent()).userId(userId).build();
         commentRepository.save(comment);
+    }
+
+    @Override
+    public List<Disease> findAllDisease() {
+        return diseaseRepository.findAll();
     }
 
 }

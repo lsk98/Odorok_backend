@@ -11,6 +11,7 @@ import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.community.service.ArticleService;
 import com.odorok.OdorokApplication.draftDomain.Article;
+import com.odorok.OdorokApplication.draftDomain.Disease;
 import com.odorok.OdorokApplication.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,7 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 public class ArticleApiController {
+
     private final ArticleService articleService;
+
     @Operation(summary = "게시물 전체조회", description = "등록일순,좋아요순,조회순으로 정렬가능 pageNum은 1부터 유효")
     @ApiResponse(responseCode = "200", description = "조회 성공시 요약 정보들이 전송됨")
     @GetMapping("/search")
@@ -98,4 +101,11 @@ public class ArticleApiController {
         articleService.registComment(articleId,request,userId);
         return ResponseEntity.ok(CommonResponseBuilder.success("댓글 작성 성공"));
     }
+    @Operation(summary = "게시판에서 사용할 질병 목록 반환", description = "질병 목록을 반환함")
+    @ApiResponse(responseCode = "200", description = "질병 목록 반환")
+    @PostMapping("/diseases")
+    public ResponseEntity<ResponseRoot<List<Disease>>> findAllDisease() {
+        return ResponseEntity.ok(CommonResponseBuilder.success("댓글 작성 성공",articleService.findAllDisease()));
+    }
+
 }

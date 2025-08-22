@@ -11,4 +11,5 @@ public class ArticleSearchCondition {
     private int pageNum;
     private String sort;
     private String title;
+    private int diseaseId;
 }

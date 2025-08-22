@@ -8,9 +8,11 @@ import com.odorok.OdorokApplication.community.dto.response.ArticleDetail;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.repository.ArticleRepository;
 import com.odorok.OdorokApplication.community.repository.CommentRepository;
+import com.odorok.OdorokApplication.community.repository.DiseaseRepository;
 import com.odorok.OdorokApplication.community.repository.LikeRepository;
 import com.odorok.OdorokApplication.domain.Like;
 import com.odorok.OdorokApplication.draftDomain.Article;
+import com.odorok.OdorokApplication.draftDomain.Disease;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,8 @@ class ArticleServiceTest {
     LikeRepository likeRepository;
     @Mock
     CommentRepository commentRepository;
+    @Mock
+    DiseaseRepository diseaseRepository;
     @InjectMocks
     ArticleServiceImpl articleService;
 
@@ -162,5 +166,16 @@ class ArticleServiceTest {
         Long userId = 1L;
         articleService.registComment(articleId,request,userId);
         verify(commentRepository,times(1)).save(any());
+    }
+    @Test
+    void 질병_목록_불러오기_성공(){
+        //given
+        List<Disease> list = List.of(Disease.builder().id(1L).name("당뇨").build());
+        //when
+        when(diseaseRepository.findAll()).thenReturn(list);
+        //then
+        articleService.findAllDisease();
+        verify(diseaseRepository,times(1)).findAll();
+        assertEquals(list,diseaseRepository.findAll());
     }
 }

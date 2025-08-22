@@ -8,6 +8,7 @@ import com.odorok.OdorokApplication.community.dto.response.ArticleDetail;
 import com.odorok.OdorokApplication.community.dto.response.ArticleSummary;
 import com.odorok.OdorokApplication.community.dto.response.CommentSummary;
 import com.odorok.OdorokApplication.draftDomain.Article;
+import com.odorok.OdorokApplication.draftDomain.Disease;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -21,4 +22,5 @@ public interface ArticleService {
     public void updateLike(Long articleId,Long userId);
     public List<CommentSummary> findCommentsByArticleId(Long articleId);
     public void registComment(Long articleId,CommentRegistRequest request,Long userId);
+    public List<Disease> findAllDisease();
 }
